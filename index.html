@@ -112,10 +112,26 @@
     </div>
 
     <div class="stat-card">
-      <div class="stat-icon purple">🔄</div>
+      <div class="stat-icon purple">⚡</div>
       <div class="stat-info">
         <span class="stat-label">Running Now</span>
         <span class="stat-value" id="stat-running">—</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon green">✅</div>
+      <div class="stat-info">
+        <span class="stat-label">Standby</span>
+        <span class="stat-value" id="stat-standby">—</span>
+      </div>
+    </div>
+
+    <div class="stat-card s-nodata">
+      <div class="stat-icon orange">⚠️</div>
+      <div class="stat-info">
+        <span class="stat-label">Not Configured</span>
+        <span class="stat-value" id="stat-no-data">—</span>
       </div>
     </div>
 
@@ -135,8 +151,10 @@
         </div>
       </div>
       <div class="donut-legend">
-        <div class="dl-item"><span class="dl-dot online"></span>Online</div>
+        <div class="dl-item"><span class="dl-dot running"></span>Running</div>
+        <div class="dl-item"><span class="dl-dot standby"></span>Standby</div>
         <div class="dl-item"><span class="dl-dot offline"></span>Offline</div>
+        <div class="dl-item"><span class="dl-dot no-data"></span>N/Configured</div>
       </div>
     </div>
 
@@ -179,8 +197,11 @@
     <!-- Filters -->
     <div class="filter-group" role="group" aria-label="Filter by status">
       <button class="filter-btn active" data-filter="all">All</button>
-      <button class="filter-btn" data-filter="online">Online</button>
-      <button class="filter-btn" data-filter="offline">Offline</button>
+      <button class="filter-btn" data-filter="running">⚡ Running</button>
+      <button class="filter-btn" data-filter="standby">✅ Standby</button>
+      <button class="filter-btn" data-filter="online">🔗 Online</button>
+      <button class="filter-btn" data-filter="offline">📴 Offline</button>
+      <button class="filter-btn" data-filter="no-data">⚠️ Not Configured</button>
     </div>
 
     <select class="filter-sel" id="filter-type" aria-label="Filter by type">
@@ -195,7 +216,7 @@
 
     <select class="filter-sel" id="sort-by" aria-label="Sort devices">
       <option value="name">Sort: Name</option>
-      <option value="status">Sort: Status</option>
+      <option value="status">Sort: State (Running first)</option>
       <option value="location">Sort: Location</option>
       <option value="kw">Sort: Power (kW)</option>
     </select>

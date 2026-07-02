@@ -47,6 +47,22 @@ const DEVICES_DATA = [
 ];
 
 // ─── APP STATE ───────────────────────────────────────────────────────────────
+// ─── DEVICE STATE CLASSIFIER ────────────────────────────────────────────────
+// 4 states: running | standby | offline | no-data
+// no-data  = empty telemetry -> device NOT connected or NOT configured yet
+// offline  = has prior telemetry but currently inactive/disconnected
+// standby  = connected & sending data but pump not drawing power
+// running  = pump actively drawing current (|kW| > 0)
+function getDeviceState(d) {
+  const hasTel = Object.keys(d.telemetry).length > 0;
+  if (!hasTel) return 'no-data';
+  if (!d.active) return 'offline';
+  if (d.type === 'Pump' && Math.abs(parseFloat(d.telemetry.data_kw) || 0) > 0) return 'running';
+  return 'standby';
+}
+const STATE_LABEL = { running:'Running', standby:'Standby', offline:'Offline', 'no-data':'Not Configured' };
+const STATE_ICON  = { running:'⚡', standby:'✅', offline:'📴', 'no-data':'⚠️' };
+
 const state = {
   theme: localStorage.getItem('iot-theme') || 'dark',
   filter: 'all', typeFilter: 'all', locationFilter: 'all',
@@ -55,29 +71,39 @@ const state = {
 };
 
 function getStats() {
-  const total = DEVICES_DATA.length;
-  const online = DEVICES_DATA.filter(d => d.active).length;
-  const pumps = DEVICES_DATA.filter(d => d.type === 'Pump').length;
+  const total    = DEVICES_DATA.length;
+  const pumps    = DEVICES_DATA.filter(d => d.type === 'Pump').length;
   const flowMeters = total - pumps;
-  const running = DEVICES_DATA.filter(d => d.type==='Pump' && d.active && Math.abs(parseFloat(d.telemetry.data_kw)||0)>0).length;
-  const totalKW = DEVICES_DATA.reduce((s,d)=>s+Math.abs(parseFloat(d.telemetry.data_kw)||0),0);
+  const running  = DEVICES_DATA.filter(d => getDeviceState(d) === 'running').length;
+  const standby  = DEVICES_DATA.filter(d => getDeviceState(d) === 'standby').length;
+  const offline  = DEVICES_DATA.filter(d => getDeviceState(d) === 'offline').length;
+  const noData   = DEVICES_DATA.filter(d => getDeviceState(d) === 'no-data').length;
+  const online   = running + standby;
+  const totalKW  = DEVICES_DATA.reduce((s,d)=>s+Math.abs(parseFloat(d.telemetry.data_kw)||0),0);
   const totalKWH = DEVICES_DATA.reduce((s,d)=>{const v=parseFloat(d.telemetry.data_kwh)||0;return s+(v<1e7?v:0);},0);
-  return {total,online,offline:total-online,pumps,flowMeters,running,totalKW,totalKWH};
+  return {total,online,offline,pumps,flowMeters,running,standby,noData,totalKW,totalKWH};
 }
 
 function getLocations() { return [...new Set(DEVICES_DATA.map(d=>d.location))].sort(); }
 
 function getFilteredDevices() {
   let d=[...DEVICES_DATA];
-  if(state.filter==='online') d=d.filter(x=>x.active);
-  else if(state.filter==='offline') d=d.filter(x=>!x.active);
+  const ds = x => getDeviceState(x);
+  if     (state.filter==='running')  d=d.filter(x=>ds(x)==='running');
+  else if(state.filter==='standby')  d=d.filter(x=>ds(x)==='standby');
+  else if(state.filter==='online')   d=d.filter(x=>ds(x)==='running'||ds(x)==='standby');
+  else if(state.filter==='offline')  d=d.filter(x=>ds(x)==='offline');
+  else if(state.filter==='no-data')  d=d.filter(x=>ds(x)==='no-data');
   if(state.typeFilter!=='all') d=d.filter(x=>x.type===state.typeFilter);
   if(state.locationFilter!=='all') d=d.filter(x=>x.location===state.locationFilter);
   if(state.search){const q=state.search.toLowerCase();d=d.filter(x=>x.name.toLowerCase().includes(q)||x.location.toLowerCase().includes(q)||(x.telemetry.chip_id&&x.telemetry.chip_id.toLowerCase().includes(q)));}
   d.sort((a,b)=>{
     let va,vb;
     if(state.sortBy==='name'){va=a.name;vb=b.name;}
-    else if(state.sortBy==='status'){va=a.active?1:0;vb=b.active?1:0;}
+    else if(state.sortBy==='status'){
+      const ord={running:0,standby:1,offline:2,'no-data':3};
+      va=ord[getDeviceState(a)]??9; vb=ord[getDeviceState(b)]??9;
+    }
     else if(state.sortBy==='location'){va=a.location;vb=b.location;}
     else if(state.sortBy==='kw'){va=Math.abs(parseFloat(a.telemetry.data_kw)||0);vb=Math.abs(parseFloat(b.telemetry.data_kw)||0);}
     if(typeof va==='string') return state.sortDir==='asc'?va.localeCompare(vb):vb.localeCompare(va);
@@ -120,13 +146,20 @@ function getCC(){
   return{grid:d?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.07)',tick:d?'#8892a4':'#64748b',leg:d?'#c0ccd8':'#334155'};
 }
 
-function initDonut(online,offline){
+function initDonut(running,standby,offline,noData){
   const ctx=document.getElementById('donutChart');if(!ctx)return;
   if(donutChart)donutChart.destroy();
   donutChart=new Chart(ctx,{
     type:'doughnut',
-    data:{labels:['Online','Offline'],datasets:[{data:[online,offline],backgroundColor:['#00d4aa','#ff4757'],borderWidth:0,hoverOffset:10}]},
-    options:{cutout:'72%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed}`}}},animation:{duration:900}}
+    data:{
+      labels:['Running','Standby','Offline','Not Configured'],
+      datasets:[{
+        data:[running,standby,offline,noData],
+        backgroundColor:['#7461ef','#00d4aa','#ff4757','#f59e0b'],
+        borderWidth:0, hoverOffset:10
+      }]
+    },
+    options:{cutout:'70%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed}`}}},animation:{duration:900}}
   });
 }
 
@@ -186,7 +219,9 @@ function renderStats(){
   se('stat-pumps',s.pumps);se('stat-flow',s.flowMeters);
   se('stat-kw',s.totalKW.toFixed(1)+' kW');se('stat-kwh',(s.totalKWH/1000).toFixed(1)+' MWh');
   se('stat-running',s.running);
-  initDonut(s.online,s.offline);
+  se('stat-standby',s.standby);
+  se('stat-no-data',s.noData);
+  initDonut(s.running,s.standby,s.offline,s.noData);
 }
 
 function deviceCard(d){
@@ -194,8 +229,9 @@ function deviceCard(d){
   const isPump=d.type==='Pump';
   const kw=isPump?parseFloat(d.telemetry.data_kw)||0:0;
   const isRunning=isPump&&Math.abs(kw)>0;
-  const sc=d.active?(isRunning?'running':'online'):'offline';
-  const sl=d.active?(isRunning?'Running':'Standby'):'Offline';
+  const ds=getDeviceState(d);
+  const sc=ds;
+  const sl=STATE_LABEL[ds];
   const vRN=isPump?parseFloat(d.telemetry.data_voltage_r_n)||0:0;
   const cur=isPump?parseFloat(d.telemetry.data_current_r)||0:0;
   const pf=isPump?parseFloat(d.telemetry.data_pf)||0:0;
@@ -225,7 +261,7 @@ function deviceCard(d){
       <div class="metric wide"><span class="metric-label">Flow Rate</span><span class="metric-value flow-val">${fmtNum(fr,3)}<small>m³/h</small></span></div>
       <div class="metric wide"><span class="metric-label">Total Flow</span><span class="metric-value">${fmtNum(ft,3)}<small>m³</small></span></div>
     `}
-  </div>`:`<div class="no-telemetry"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg> No telemetry data</div>`}
+  </div>`:`<div class="no-telemetry"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg> Not Connected / Not Configured</div>`}
   <div class="card-footer">
     <span class="chip-id">${d.telemetry.chip_id?'🔲 '+d.telemetry.chip_id:'—'}</span>
     <span class="last-seen">🕐 ${timeSince(d.lastActivityTime)}</span>
@@ -260,8 +296,9 @@ function openModal(device){
   const tel=device.telemetry;
   const hasTel=Object.keys(tel).length>0;
   const isRunning=isPump&&Math.abs(parseFloat(tel.data_kw)||0)>0;
-  const sc=device.active?(isRunning?'running':'online'):'offline';
-  const sl=device.active?(isRunning?'Running':'Online / Standby'):'Offline';
+  const ds=getDeviceState(device);
+  const sc=ds;
+  const sl=STATE_LABEL[ds];
   content.innerHTML=`
 <div class="modal-header">
   <div class="modal-icon ${isPump?'icon-pump':'icon-flow'}">${isPump?pumpSVG():flowSVG()}</div>
