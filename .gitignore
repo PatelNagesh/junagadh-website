@@ -1,0 +1,27 @@
+﻿# ─── Junagadh IoT Dashboard – .gitignore ───
+
+# Data / API files (sensitive)
+*.json
+token.txt
+
+# Python generator scripts (temp)
+gen_*.py
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# VS Code
+.vscode/
+
+# Node (if added later)
+node_modules/
+npm-debug.log*
+
+# Build outputs (if added later)
+dist/
+build/
+
+# Logs
+*.log

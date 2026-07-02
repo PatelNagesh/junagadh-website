@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Junagadh Municipal Corporation IoT Dashboard - Real-time monitoring of 40 pump and flow meter devices across Junagadh city water infrastructure."/>
+  <meta name="keywords" content="IoT Dashboard, Junagadh, Pump Monitoring, Flow Meter, Water Infrastructure"/>
+  <meta property="og:title" content="JUMC IoT Dashboard"/>
+  <meta property="og:description" content="Real-time pump and flow meter monitoring for Junagadh city."/>
+  <title>JUMC IoT Dashboard — Junagadh Water Infrastructure</title>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     HEADER
+════════════════════════════════════════ -->
+<header class="header" role="banner">
+  <div class="header-left">
+    <div class="logo-icon" aria-hidden="true">💧</div>
+    <div class="logo-text">
+      <span class="logo-title">JUMC IoT Dashboard</span>
+      <span class="logo-sub">Junagadh Water Infrastructure</span>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <div class="header-clock" aria-live="polite">
+      <span id="live-clock">--:--:--</span>
+    </div>
+    <span class="last-sync" id="last-updated" aria-live="polite">Syncing…</span>
+    <button class="icon-btn" id="refresh-btn" title="Refresh data" aria-label="Refresh">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18">
+        <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+      </svg>
+    </button>
+    <button class="icon-btn" id="theme-toggle" title="Toggle theme" aria-label="Toggle dark/light mode">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════
+     MAIN CONTENT
+════════════════════════════════════════ -->
+<main class="main" role="main">
+
+  <!-- STATS ROW -->
+  <section class="stats-row" aria-label="Summary statistics">
+
+    <div class="stat-card">
+      <div class="stat-icon blue">📡</div>
+      <div class="stat-info">
+        <span class="stat-label">Total Devices</span>
+        <span class="stat-value" id="stat-total">40</span>
+      </div>
+    </div>
+
+    <div class="stat-card s-online">
+      <div class="stat-icon green">✅</div>
+      <div class="stat-info">
+        <span class="stat-label">Online</span>
+        <span class="stat-value" id="stat-online">—</span>
+      </div>
+    </div>
+
+    <div class="stat-card s-offline">
+      <div class="stat-icon red">❌</div>
+      <div class="stat-info">
+        <span class="stat-label">Offline</span>
+        <span class="stat-value" id="stat-offline">—</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon purple">⚙️</div>
+      <div class="stat-info">
+        <span class="stat-label">Pumps</span>
+        <span class="stat-value" id="stat-pumps">—</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon blue">💧</div>
+      <div class="stat-info">
+        <span class="stat-label">Flow Meters</span>
+        <span class="stat-value" id="stat-flow">—</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon teal">⚡</div>
+      <div class="stat-info">
+        <span class="stat-label">Active Power</span>
+        <span class="stat-value" id="stat-kw">—</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon orange">🔋</div>
+      <div class="stat-info">
+        <span class="stat-label">Total Energy</span>
+        <span class="stat-value" id="stat-kwh">—</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon purple">🔄</div>
+      <div class="stat-info">
+        <span class="stat-label">Running Now</span>
+        <span class="stat-value" id="stat-running">—</span>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ANALYTICS ROW -->
+  <section class="analytics-row" aria-label="Analytics charts">
+
+    <!-- Donut Chart -->
+    <div class="donut-card">
+      <h3>Device Status</h3>
+      <div class="donut-wrap">
+        <canvas id="donutChart" aria-label="Device status doughnut chart"></canvas>
+        <div class="donut-center">
+          <span class="dc-val" id="stat-total-donut">40</span>
+          <span class="dc-label">Total</span>
+        </div>
+      </div>
+      <div class="donut-legend">
+        <div class="dl-item"><span class="dl-dot online"></span>Online</div>
+        <div class="dl-item"><span class="dl-dot offline"></span>Offline</div>
+      </div>
+    </div>
+
+    <!-- Telemetry Charts -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3>Live Telemetry Overview</h3>
+        <div class="chart-tabs" role="tablist">
+          <button class="chart-tab active" data-tab="power" role="tab" aria-selected="true">Power & Voltage</button>
+          <button class="chart-tab" data-tab="flow" role="tab" aria-selected="false">Flow Meters</button>
+        </div>
+      </div>
+      <div class="chart-body">
+        <div class="chart-panel active" id="chart-power" role="tabpanel">
+          <canvas id="telChart" aria-label="Power and voltage bar chart"></canvas>
+        </div>
+        <div class="chart-panel" id="chart-flow" role="tabpanel">
+          <canvas id="flowChart" aria-label="Flow meter bar chart"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar" role="search">
+
+    <!-- Search -->
+    <div class="search-box">
+      <input
+        type="search"
+        id="search-input"
+        placeholder="🔍  Search by name, location, chip ID…"
+        autocomplete="off"
+        aria-label="Search devices"
+      />
+      <button class="search-clear" id="clear-search" title="Clear search" aria-label="Clear search">✕</button>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-group" role="group" aria-label="Filter by status">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="online">Online</button>
+      <button class="filter-btn" data-filter="offline">Offline</button>
+    </div>
+
+    <select class="filter-sel" id="filter-type" aria-label="Filter by type">
+      <option value="all">All Types</option>
+      <option value="Pump">⚙️ Pumps</option>
+      <option value="Flow-Meter">💧 Flow Meters</option>
+    </select>
+
+    <select class="filter-sel" id="filter-location" aria-label="Filter by location">
+      <option value="all">All Locations</option>
+    </select>
+
+    <select class="filter-sel" id="sort-by" aria-label="Sort devices">
+      <option value="name">Sort: Name</option>
+      <option value="status">Sort: Status</option>
+      <option value="location">Sort: Location</option>
+      <option value="kw">Sort: Power (kW)</option>
+    </select>
+
+    <div class="toolbar-right">
+      <span class="result-count" id="result-count" aria-live="polite">40 devices</span>
+      <div class="view-btns" role="group" aria-label="View mode">
+        <button class="view-btn active" data-view="grid" title="Grid view" aria-label="Grid view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+          </svg>
+        </button>
+        <button class="view-btn" data-view="list" title="List view" aria-label="List view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16">
+            <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+            <line x1="8" y1="18" x2="21" y2="18"/>
+            <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
+            <line x1="3" y1="18" x2="3.01" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- DEVICE GRID -->
+  <section id="device-grid" class="device-grid" aria-label="Device list" aria-live="polite"></section>
+
+  <!-- EMPTY STATE -->
+  <div id="empty-state" class="empty-state" aria-label="No devices found" role="status">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="56">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      <line x1="8" y1="11" x2="14" y2="11"/>
+    </svg>
+    <p>No devices match your filters</p>
+    <small>Try adjusting the search or filter criteria</small>
+  </div>
+
+</main>
+
+<!-- ═══════════════════════════════════════
+     DEVICE DETAIL MODAL
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="device-modal" role="dialog" aria-modal="true" aria-label="Device details">
+  <div class="modal-box">
+    <div class="modal-topbar">
+      <h2>Device Details</h2>
+      <button class="modal-close-btn" id="modal-close" aria-label="Close modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="modal-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     FOOTER
+════════════════════════════════════════ -->
+<footer class="footer" role="contentinfo">
+  <p>
+    &copy; 2026 Junagadh Municipal Corporation &nbsp;|&nbsp;
+    IoT Dashboard powered by <a href="https://iot.ariontechsol.com" target="_blank" rel="noopener">Arion Tech Solutions</a>
+    &nbsp;|&nbsp; 40 devices monitored &nbsp;|&nbsp; Data synced 2026-07-02 21:03 IST
+  </p>
+</footer>
+
+<!-- ═══════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════ -->
+<script src="app.js"></script>
+
+</body>
+</html>
