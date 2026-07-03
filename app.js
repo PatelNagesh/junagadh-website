@@ -1164,8 +1164,26 @@ function mergeApiData(apiDevices, telemetryMap) {
     // FIX: lastActivityTime from attributes, fall back to seed
     const lastActivityTime = tData.lastActivityTime ?? seed.lastActivityTime ?? null;
 
-    // Location: ThingsBoard label field is often empty – preserve seed location
-    const location = apiDev.label || seed.location || 'Unknown';
+    // LOCATION FIX: ThingsBoard 'label' field contains city names like "Junagadh", "SARAGVADA"
+    // – NOT the device-level location we parse from device names.
+    // Priority: (1) seed data location (most reliable), (2) parse from device name, (3) Unknown
+    let location = seed.location;
+    if (!location) {
+      // Derive location from device name pattern: "Sardarbag-Pump-1" → "Sardarbag"
+      // "AdityNager-PUMP-1" → "Adityanagar", "Varun-Pumping-FLOW-1" → "Varun Pumping"
+      const nm = apiDev.name || '';
+      const nameMap = {
+        'anandpur'  : 'Anandpur',    'padariya'   : 'Padariya',
+        'sardarbag' : 'Sardarbag',   'gopalwadi'  : 'Gopalwadi',
+        'timbavadi' : 'Timbavadi',   'saragvada'  : 'Saragvada',
+        'aditynager': 'Adityanagar', 'aditynanag' : 'Adityanagar',
+        'varun'     : 'Varun Pumping','dharmaveda' : 'Dharmaveda',
+        'dharamaved': 'Dharamaveda', 'khamdhrol'  : 'Khamdhrol',
+        'dolatpara' : 'Dolatpara',
+      };
+      const nmLow = nm.toLowerCase();
+      location = Object.entries(nameMap).find(([k]) => nmLow.startsWith(k))?.[1] || 'Unknown';
+    }
 
     const merged = {
       id,
@@ -1787,7 +1805,8 @@ function getLocationWorstState(location) {
  * @used-in  renderMap()
  */
 function buildMarkerIcon(worstState, count, label) {
-  const cls = `mm-${worstState.replace('-','data')==='mmno-data'?'nodata':worstState}`;
+  // Normalise state key to CSS class: 'no-data' -> 'nodata' (hyphen removed)
+  const cls = 'mm-' + worstState.replace('-','');
   return L.divIcon({
     className: 'custom-marker',
     html: `<div class="map-marker">
@@ -1835,8 +1854,8 @@ function initMap() {
   if (typeof L === 'undefined') { console.error('[JUMC Map] Leaflet not loaded'); return; }
 
   leafletMap = L.map('iot-map', {
-    center    : [21.521901, 70.457726], // Junagadh city centre
-    zoom      : 13,
+    center    : [21.480000, 70.467000], // Centred between Junagadh city and Anandpur Dam
+    zoom      : 12,
     zoomControl: true,
     attributionControl: true
   });
@@ -1896,6 +1915,12 @@ function renderMap() {
 
     mapMarkers.push(marker);
   });
+
+  // Auto-fit map to show ALL placed markers
+  if (mapMarkers.length > 0) {
+    const bounds = L.featureGroup(mapMarkers).getBounds().pad(0.1);
+    leafletMap.fitBounds(bounds, { maxZoom: 14 });
+  }
 }
 
 /**
