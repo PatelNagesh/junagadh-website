@@ -13,6 +13,12 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <!-- Stylesheet -->
   <link rel="stylesheet" href="style.css"/>
+  <!--
+    config.js: API credentials + poll interval (gitignored, never committed).
+    Must load BEFORE app.js so APP_CONFIG is available to CONFIG merge in Section 1.
+    If file is missing, the dashboard gracefully shows cached/seed data.
+  -->
+  <script src="config.js"></script>
 </head>
 <body>
 
@@ -33,6 +39,8 @@
       <span id="live-clock">--:--:--</span>
     </div>
     <span class="last-sync" id="last-updated" aria-live="polite">Syncing…</span>
+    <!-- Countdown to next auto-refresh – updated by updateCountdown() in app.js -->
+    <span class="sync-countdown" id="sync-countdown" aria-live="polite"></span>
     <button class="icon-btn" id="refresh-btn" title="Refresh data" aria-label="Refresh">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18">
         <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
@@ -286,6 +294,8 @@
 
 <!-- ═══════════════════════════════════════
      SCRIPTS
+     Load order: config.js (head) → Chart.js (head) → app.js (body end)
+     config.js is already loaded in <head> above app.js.
 ════════════════════════════════════════ -->
 <script src="app.js"></script>
 

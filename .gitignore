@@ -25,3 +25,6 @@ build/
 
 # Logs
 *.log
+
+# API credentials (never commit!)
+config.js
