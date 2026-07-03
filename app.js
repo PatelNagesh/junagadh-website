@@ -30,22 +30,22 @@
 
 /** @type {Object} CONFIG - merged from config.js + safe defaults */
 const CONFIG = Object.assign({
-  apiBase        : 'https://iot.ariontechsol.com',
-  username       : '',
-  password       : '',
-  pollIntervalMs : 10 * 60 * 1000,   // 10 minutes
-  pageSize       : 100,
-  telemetryKeys  : [
-    'chip_id','device_id','datetime',
-    'data_current_r','data_current_y','data_current_b',
-    'data_voltage_r_n','data_voltage_y_n','data_voltage_b_n',
-    'data_voltage_r_y','data_voltage_y_b','data_voltage_b_r',
-    'data_kw','data_kva','data_kvarh','data_kwh','data_kvah',
-    'data_pf','data_pf_r','data_pf_y','data_pf_b',
-    'data_frequency','running_time_min','total_running_hours','start_stop_count',
-    'data_flow_rate','data_flow_total','data_flow_unit','flow_rate','flow_total',
-    'data_flow_decimal_point','data_flow_kilo_flag','data_flow_empty_pipe',
-    'data_flow_over_range','data_flow_total_decimal_point'
+  apiBase: 'https://iot.ariontechsol.com',
+  username: '',
+  password: '',
+  pollIntervalMs: 10 * 60 * 1000,   // 10 minutes
+  pageSize: 100,
+  telemetryKeys: [
+    'chip_id', 'device_id', 'datetime',
+    'data_current_r', 'data_current_y', 'data_current_b',
+    'data_voltage_r_n', 'data_voltage_y_n', 'data_voltage_b_n',
+    'data_voltage_r_y', 'data_voltage_y_b', 'data_voltage_b_r',
+    'data_kw', 'data_kva', 'data_kvarh', 'data_kwh', 'data_kvah',
+    'data_pf', 'data_pf_r', 'data_pf_y', 'data_pf_b',
+    'data_frequency', 'running_time_min', 'total_running_hours', 'start_stop_count',
+    'data_flow_rate', 'data_flow_total', 'data_flow_unit', 'flow_rate', 'flow_total',
+    'data_flow_decimal_point', 'data_flow_kilo_flag', 'data_flow_empty_pipe',
+    'data_flow_over_range', 'data_flow_total_decimal_point'
   ]
 }, (typeof APP_CONFIG !== 'undefined' ? APP_CONFIG : {}));
 
@@ -58,46 +58,46 @@ const CONFIG = Object.assign({
 // ─────────────────────────────────────────────────────────────────────────────
 
 const DEVICES_DATA = [
-  {id:"0599ab60-760f-11f1-b06d-0f068c9b61d7",name:"Padariya-Pump-2",type:"Pump",location:"Padariya",active:true,lastActivityTime:1783054210463,createdTime:1782994231574,telemetry:{chip_id:"686F9DF9D108",device_id:"PADARIYAFT-PUMP-2",datetime:"2026-07-02 21:03:10",data_current_r:1.9393,data_current_y:1.8583,data_current_b:2.0529,data_voltage_r_n:247.33,data_voltage_y_n:247.42,data_voltage_b_n:246.35,data_voltage_r_y:428.4661,data_voltage_y_b:427.6177,data_voltage_b_r:427.5397,data_kw:-1.1496,data_kva:1.4605,data_kvarh:1.831,data_kwh:2.403,data_kvah:3.031,data_pf:-0.7871,data_pf_r:-0.825,data_pf_y:-0.772,data_pf_b:-0.782,data_frequency:49.83,running_time_min:20.3,total_running_hours:-1485833.39,start_stop_count:4}},
-  {id:"07afffd0-7470-11f1-b06d-0f068c9b61d7",name:"Dharamaveda-Flow-1",type:"Flow-Meter",location:"Dharamaveda",active:true,lastActivityTime:1783054198205,createdTime:1782815993933,telemetry:{}},
-  {id:"0ddf82e0-747a-11f1-b06d-0f068c9b61d7",name:"Sardarbag-Pump-4",type:"Pump",location:"Sardarbag",active:true,lastActivityTime:1783054211493,createdTime:1782820299278,telemetry:{chip_id:"C0C90FB3A3A0",device_id:"Sardarbag-OLD-PUMP-4",datetime:"2026-07-02 21:03:37",data_current_r:327.675,data_current_y:327.675,data_current_b:327.675,data_voltage_r_n:655.35,data_voltage_y_n:655.35,data_voltage_b_n:655.35,data_voltage_r_y:1.1351,data_voltage_y_b:1.1351,data_voltage_b_r:1.1351,data_kw:0,data_kva:0,data_kvarh:52427768.644,data_kwh:52462648.646,data_kvah:25679496.976,data_pf:1,data_pf_r:-0.001,data_pf_y:-0.001,data_pf_b:-0.001,data_frequency:655.35,running_time_min:0,total_running_hours:0,start_stop_count:0}},
-  {id:"30851eb0-748c-11f1-b06d-0f068c9b61d7",name:"Timbavadi-old-Pump-1",type:"Pump",location:"Timbavadi",active:false,lastActivityTime:null,createdTime:1782828088347,telemetry:{}},
-  {id:"33316280-7456-11f1-b06d-0f068c9b61d7",name:"Anandpur-NEW-Flow-1",type:"Flow-Meter",location:"Anandpur",active:true,lastActivityTime:1783054189130,createdTime:1782804900008,telemetry:{chip_id:"000A9DF9D108",device_id:"Anandpur-New-Flow-1",datetime:"2026-07-02 21:03:32",data_flow_rate:0,data_flow_total:0,data_flow_unit:0,data_flow_decimal_point:0,data_flow_kilo_flag:0,data_flow_empty_pipe:0,data_flow_over_range:0,data_flow_total_decimal_point:0}},
-  {id:"378ba800-746e-11f1-b06d-0f068c9b61d7",name:"Dharmaveda-Pump-1",type:"Pump",location:"Dharmaveda",active:true,lastActivityTime:1783054200469,createdTime:1782815215232,telemetry:{chip_id:"581DDBF9D108",device_id:"Dharmaveda-PUMP-1",datetime:"2026-07-02 21:03:34",data_current_r:0,data_current_y:0,data_current_b:0,data_voltage_r_n:238.43,data_voltage_y_n:231.73,data_voltage_b_n:237.81,data_voltage_r_y:407.1843,data_voltage_y_b:406.645,data_voltage_b_r:412.436,data_kw:0,data_kva:0,data_kvarh:1292.342,data_kwh:2400.183,data_kvah:2737.141,data_pf:1,data_pf_r:1,data_pf_y:1,data_pf_b:1,data_frequency:49.83,running_time_min:0,total_running_hours:-495264.99,start_stop_count:3}},
-  {id:"44dfd800-748c-11f1-b06d-0f068c9b61d7",name:"Timbavadi-old-Pump-2",type:"Pump",location:"Timbavadi",active:false,lastActivityTime:null,createdTime:1782828122496,telemetry:{}},
-  {id:"4ebc4b30-744e-11f1-b06d-0f068c9b61d7",name:"Anandpur-Pump-1",type:"Pump",location:"Anandpur",active:true,lastActivityTime:1783054200861,createdTime:1782801510243,telemetry:{chip_id:"5806DBF9D108",device_id:"ANANDPUR-PUMP-1",datetime:"2026-07-02 21:03:09",data_current_r:0,data_current_y:0,data_current_b:0,data_voltage_r_n:248.75,data_voltage_y_n:248.67,data_voltage_b_n:247.14,data_voltage_r_y:430.7783,data_voltage_y_b:429.3847,data_voltage_b_r:429.4541,data_kw:0,data_kva:0,data_kvarh:275492.391,data_kwh:1115837.587,data_kvah:1238068.198,data_pf:1,data_pf_r:1,data_pf_y:1,data_pf_b:1,data_frequency:49.82,running_time_min:0,total_running_hours:-1485751.25,start_stop_count:4}},
-  {id:"4ed89480-7448-11f1-b06d-0f068c9b61d7",name:"Anandpur-Pump-3",type:"Pump",location:"Anandpur",active:true,lastActivityTime:1783054198745,createdTime:1782798933448,telemetry:{chip_id:"2C9D0EB3A3A0",device_id:"ANANDPUR-PUMP-3",datetime:"2026-07-02 21:03:37",data_current_r:160.56,data_current_y:153.728,data_current_b:0,data_voltage_r_n:248.78,data_voltage_y_n:248.88,data_voltage_b_n:247.21,data_voltage_r_y:430.9862,data_voltage_y_b:429.6274,data_voltage_b_r:429.5407,data_kw:77.8995,data_kva:78.2516,data_kvarh:443371.999,data_kwh:365673.106,data_kvah:632459.196,data_pf:0.9955,data_pf_r:0.994,data_pf_y:0.996,data_pf_b:1,data_frequency:49.82,running_time_min:20.4,total_running_hours:-2971561.69,start_stop_count:8}},
-  {id:"59145100-7452-11f1-b06d-0f068c9b61d7",name:"Anandpur-NEW-Pump-1",type:"Pump",location:"Anandpur",active:true,lastActivityTime:1783054198236,createdTime:1782803245584,telemetry:{chip_id:"1CE59CF9D108",device_id:"Anandpur-NEW-Pump-1",datetime:"2026-07-02 21:03:35",data_current_r:0,data_current_y:0,data_current_b:0,data_voltage_r_n:250.57,data_voltage_y_n:250.82,data_voltage_b_n:253.32,data_voltage_r_y:434.2165,data_voltage_y_b:436.5998,data_voltage_b_r:436.3837,data_kw:0,data_kva:0,data_kvarh:328611.323,data_kwh:621367.737,data_kvah:705130.217,data_pf:1,data_pf_r:1,data_pf_y:1,data_pf_b:1,data_frequency:49.83,running_time_min:0,total_running_hours:-495262.57,start_stop_count:2}},
-  {id:"5b98cca0-748c-11f1-b06d-0f068c9b61d7",name:"Timbavadi-old-Pump-3",type:"Pump",location:"Timbavadi",active:false,lastActivityTime:null,createdTime:1782828160618,telemetry:{}},
-  {id:"62a41a70-747a-11f1-b06d-0f068c9b61d7",name:"Sardarbag-FLOW-1",type:"Flow-Meter",location:"Sardarbag",active:false,lastActivityTime:null,createdTime:1782820441495,telemetry:{}},
-  {id:"6c4ba8a0-7505-11f1-b06d-0f068c9b61d7",name:"Saragvada-PUMP-2",type:"Pump",location:"Saragvada",active:false,lastActivityTime:null,createdTime:1782880157738,telemetry:{}},
-  {id:"6dff0680-751c-11f1-b06d-0f068c9b61d7",name:"AdityNager-PUMP-3",type:"Pump",location:"Adityanagar",active:true,lastActivityTime:1783054189768,createdTime:1782890039016,telemetry:{chip_id:"F03F9EF9D108",device_id:"Aditynagar-PUMP-3",datetime:"2026-07-02 21:03:28",data_current_r:0,data_current_y:0,data_current_b:0,data_voltage_r_n:255.48,data_voltage_y_n:254.97,data_voltage_b_n:257.6,data_voltage_r_y:442.0627,data_voltage_y_b:443.9006,data_voltage_b_r:444.3416,data_kw:0,data_kva:0,data_kvarh:15.623,data_kwh:9.18,data_kvah:20.724,data_pf:1,data_pf_r:1,data_pf_y:1,data_pf_b:1,data_frequency:49.82,running_time_min:0,total_running_hours:0,start_stop_count:0}},
-  {id:"6f21ea70-7452-11f1-b06d-0f068c9b61d7",name:"Anandpur-NEW-Pump-2",type:"Pump",location:"Anandpur",active:true,lastActivityTime:1783054200996,createdTime:1782803282583,telemetry:{chip_id:"3C080FB3A3A0",device_id:"ANANDPUR-NEW-PUMP-2",datetime:"2026-07-02 21:03:11",data_current_r:151.2,data_current_y:156.336,data_current_b:158.208,data_voltage_r_n:250.43,data_voltage_y_n:250.85,data_voltage_b_n:253.34,data_voltage_r_y:434.1212,data_voltage_y_b:436.6431,data_voltage_b_r:436.28,data_kw:103.4431,data_kva:117.0536,data_kvarh:149330.679,data_kwh:283727.792,data_kvah:321752.631,data_pf:0.8837,data_pf_r:0.901,data_pf_y:0.875,data_pf_b:0.877,data_frequency:49.83,running_time_min:332.6,total_running_hours:-990499.67,start_stop_count:4}},
-  {id:"7133a190-7601-11f1-b06d-0f068c9b61d7",name:"PadariyaFT-Flow",type:"Flow-Meter",location:"Padariya",active:true,lastActivityTime:1783054205647,createdTime:1782988399145,telemetry:{chip_id:"98EC9DF9D108",device_id:"PADARIYAFT-FLOW",datetime:"2026-07-02 21:03:20",data_flow_rate:0,data_flow_total:0,data_flow_unit:1,data_flow_decimal_point:1,data_flow_kilo_flag:0,data_flow_empty_pipe:0,data_flow_over_range:0,data_flow_total_decimal_point:3}},
-  {id:"723ef3f0-7539-11f1-b06d-0f068c9b61d7",name:"Khamdhrol-FLOW-1",type:"Flow-Meter",location:"Khamdhrol",active:true,lastActivityTime:1783054215094,createdTime:1782899052336,telemetry:{chip_id:"EC329EF9D108",device_id:"Khamdhrol-FLOW-1",datetime:"2026-07-02 21:03:24",data_flow_rate:0,data_flow_total:0,data_flow_unit:1,data_flow_decimal_point:1,data_flow_kilo_flag:0,data_flow_empty_pipe:0,data_flow_over_range:0,data_flow_total_decimal_point:3}},
-  {id:"79a2a190-7490-11f1-b06d-0f068c9b61d7",name:"Gopalwadi",type:"Flow-Meter",location:"Gopalwadi",active:false,lastActivityTime:null,createdTime:1782830368714,telemetry:{chip_id:"5C9E9DF9D108",device_id:"GOPALWADI-FLOW",datetime:"2026-07-02 21:03:16",data_flow_rate:0,data_flow_total:0,data_flow_unit:1,data_flow_decimal_point:1,data_flow_kilo_flag:0,data_flow_empty_pipe:0,data_flow_over_range:0,data_flow_total_decimal_point:3}},
-  {id:"7afed300-748c-11f1-b06d-0f068c9b61d7",name:"Timbavadi-old-FLOW-1",type:"Flow-Meter",location:"Timbavadi",active:true,lastActivityTime:1783054197699,createdTime:1782828202912,telemetry:{}},
-  {id:"7f2d6fd0-7500-11f1-b06d-0f068c9b61d7",name:"Dolatpara-PUMP-1",type:"Pump",location:"Dolatpara",active:true,lastActivityTime:1783054215840,createdTime:1782877760284,telemetry:{chip_id:"98399CF9D108",device_id:"Dolatpara-PUMP-1",datetime:"2026-07-02 21:03:08",data_current_r:0,data_current_y:0,data_current_b:0,data_voltage_r_n:254.44,data_voltage_y_n:255.27,data_voltage_b_n:257.96,data_voltage_r_y:441.2939,data_voltage_y_b:444.4089,data_voltage_b_r:443.5564,data_kw:0,data_kva:0,data_kvarh:6655.22,data_kwh:7555.305,data_kvah:10109.609,data_pf:1,data_pf_r:1,data_pf_y:1,data_pf_b:1,data_frequency:49.83,running_time_min:0,total_running_hours:0,start_stop_count:0}},
-  {id:"828d29f0-746e-11f1-b06d-0f068c9b61d7",name:"Dharmaveda-Pump-2",type:"Pump",location:"Dharmaveda",active:true,lastActivityTime:1783054196076,createdTime:1782815319260,telemetry:{chip_id:"44D89DF9D108",device_id:"Dharmaveda-PUMP-2",datetime:"2026-07-02 21:03:04",data_current_r:0,data_current_y:0,data_current_b:0,data_voltage_r_n:238.66,data_voltage_y_n:232.05,data_voltage_b_n:237.86,data_voltage_r_y:407.6602,data_voltage_y_b:406.9644,data_voltage_b_r:412.6786,data_kw:0,data_kva:0,data_kvarh:1051.65,data_kwh:2013.865,data_kvah:2280.095,data_pf:1,data_pf_r:1,data_pf_y:1,data_pf_b:1,data_frequency:49.82,running_time_min:0,total_running_hours:-495264.98,start_stop_count:3}},
-  {id:"8331b0e0-747a-11f1-b06d-0f068c9b61d7",name:"Sardarbag-FLOW-2",type:"Flow-Meter",location:"Sardarbag",active:false,lastActivityTime:null,createdTime:1782820499668,telemetry:{}},
-  {id:"85d39bc0-7505-11f1-b06d-0f068c9b61d7",name:"Saragvada-PUMP-3",type:"Pump",location:"Saragvada",active:false,lastActivityTime:null,createdTime:1782880233316,telemetry:{}},
-  {id:"8aa06ea0-751c-11f1-b06d-0f068c9b61d7",name:"AdityNager-PUMP-2",type:"Pump",location:"Adityanagar",active:true,lastActivityTime:1783054196766,createdTime:1782889925004,telemetry:{chip_id:"2C3A9CF9D108",device_id:"Aditynagar-PUMP-2",datetime:"2026-07-02 21:03:05",data_current_r:0,data_current_y:0,data_current_b:0,data_voltage_r_n:255.54,data_voltage_y_n:254.9,data_voltage_b_n:257.64,data_voltage_r_y:442.0541,data_voltage_y_b:443.8748,data_voltage_b_r:444.4281,data_kw:0,data_kva:0,data_kvarh:156920.393,data_kwh:8003.811,data_kvah:157698.67,data_pf:1,data_pf_r:1,data_pf_y:1,data_pf_b:1,data_frequency:49.82,running_time_min:0,total_running_hours:1.81,start_stop_count:2}},
-  {id:"8e33f2a0-753d-11f1-b06d-0f068c9b61d7",name:"Khamdhrol-Pump-1",type:"Pump",location:"Khamdhrol",active:true,lastActivityTime:1783054190606,createdTime:1782901016348,telemetry:{chip_id:"840A9CF9D108",device_id:"Khamdhrol-Pump-1",datetime:"2026-07-02 21:03:00",data_current_r:0,data_current_y:0,data_current_b:0,data_voltage_r_n:0,data_voltage_y_n:0,data_voltage_b_n:0,data_voltage_r_y:0,data_voltage_y_b:0,data_voltage_b_r:0,data_kw:0,data_kva:0,data_kvarh:0,data_kwh:0,data_kvah:0,data_pf:0,data_pf_r:0,data_pf_y:0,data_pf_b:0,data_frequency:0,running_time_min:0,total_running_hours:0,start_stop_count:0}},
-  {id:"9702e740-751c-11f1-b06d-0f068c9b61d7",name:"AdityNager-PUMP-1",type:"Pump",location:"Adityanagar",active:true,lastActivityTime:1783054199001,createdTime:1782889763968,telemetry:{}},
-  {id:"97838700-746e-11f1-b06d-0f068c9b61d7",name:"Dharmaveda-Pump-3",type:"Pump",location:"Dharmaveda",active:false,lastActivityTime:null,createdTime:1782815342952,telemetry:{}},
-  {id:"a906b550-7479-11f1-b06d-0f068c9b61d7",name:"Sardarbag-Pump-1",type:"Pump",location:"Sardarbag",active:true,lastActivityTime:1783054217900,createdTime:1782820242048,telemetry:{chip_id:"78E6DAF9D108",device_id:"Sardarbag-PUMP-1",datetime:"2026-07-02 21:02:49",data_current_r:0,data_current_y:0,data_current_b:0,data_voltage_r_n:244.22,data_voltage_y_n:245.68,data_voltage_b_n:249.08,data_voltage_r_y:424.2664,data_voltage_y_b:428.4781,data_voltage_b_r:427.2172,data_kw:0,data_kva:0,data_kvarh:20287.586,data_kwh:36567.969,data_kvah:42504.952,data_pf:1,data_pf_r:1,data_pf_y:1,data_pf_b:1,data_frequency:49.84,running_time_min:0,total_running_hours:3.26,start_stop_count:1}},
-  {id:"aeafd8d0-751c-11f1-b06d-0f068c9b61d7",name:"AdityNager-FLOW-1",type:"Flow-Meter",location:"Adityanagar",active:true,lastActivityTime:1783053781290,createdTime:1782890162340,telemetry:{chip_id:"1C58DBF9D108",device_id:"ADITYANAGAR-FLOW",datetime:"2026-07-02 09:03:56",data_flow_rate:0,data_flow_total:0,data_flow_unit:1,flow_rate:0,flow_total:0,data_flow_decimal_point:1,data_flow_kilo_flag:0,data_flow_empty_pipe:0,data_flow_over_range:0,data_flow_total_decimal_point:3}},
-  {id:"c2782730-760e-11f1-b06d-0f068c9b61d7",name:"Padariya-Pump-1",type:"Pump",location:"Padariya",active:true,lastActivityTime:1783054210902,createdTime:1782994052424,telemetry:{chip_id:"74AF93F9D108",device_id:"PADARIYAFT-PUMP-1",datetime:"2026-07-02 21:02:48",data_current_r:0,data_current_y:0,data_current_b:0,data_voltage_r_n:247.31,data_voltage_y_n:247.6,data_voltage_b_n:246.21,data_voltage_r_y:428.6047,data_voltage_y_b:427.6526,data_voltage_b_r:427.4012,data_kw:0,data_kva:0,data_kvarh:94533.18,data_kwh:10730.115,data_kvah:95561.476,data_pf:1,data_pf_r:1,data_pf_y:1,data_pf_b:1,data_frequency:49.83,running_time_min:0,total_running_hours:0,start_stop_count:0}},
-  {id:"e08392a0-7479-11f1-b06d-0f068c9b61d7",name:"Sardarbag-Pump-2",type:"Pump",location:"Sardarbag",active:true,lastActivityTime:1783054212455,createdTime:1782820274856,telemetry:{chip_id:"B0079CF9D108",device_id:"Sardarbag-PUMP-2",datetime:"2026-07-02 21:03:12",data_current_r:0,data_current_y:0,data_current_b:0,data_voltage_r_n:244.23,data_voltage_y_n:245.57,data_voltage_b_n:249.15,data_voltage_r_y:424.1798,data_voltage_y_b:428.4438,data_voltage_b_r:427.2867,data_kw:0,data_kva:0,data_kvarh:2681.639,data_kwh:6063.986,data_kvah:6774.303,data_pf:1,data_pf_r:1,data_pf_y:1,data_pf_b:1,data_frequency:49.82,running_time_min:0,total_running_hours:0,start_stop_count:0}},
-  {id:"e263dd70-744f-11f1-b06d-0f068c9b61d7",name:"Anandpur-Pump-2",type:"Pump",location:"Anandpur",active:true,lastActivityTime:1783054196216,createdTime:1782801598784,telemetry:{chip_id:"10F5DBF9D108",device_id:"ANANDPUR-PUMP-2",datetime:"2026-07-02 21:03:07",data_current_r:153.968,data_current_y:152.96,data_current_b:0,data_voltage_r_n:248.81,data_voltage_y_n:248.77,data_voltage_b_n:247.05,data_voltage_r_y:430.9169,data_voltage_y_b:429.3936,data_voltage_b_r:429.4283,data_kw:-75.8881,data_kva:76.2548,data_kvarh:385837.434,data_kwh:285056.181,data_kvah:524626.575,data_pf:-0.9952,data_pf_r:-0.995,data_pf_y:-0.995,data_pf_b:1,data_frequency:49.82,running_time_min:825.2,total_running_hours:-495254.73,start_stop_count:3}},
-  {id:"e44bd1e0-7500-11f1-b06d-0f068c9b61d7",name:"Dolatpara-PUMP-2",type:"Pump",location:"Dolatpara",active:true,lastActivityTime:1783054217699,createdTime:1782877834800,telemetry:{chip_id:"44349CF9D108",device_id:"Dolatpara-PUMP-2",datetime:"2026-07-02 21:03:06",data_current_r:0,data_current_y:0,data_current_b:0,data_voltage_r_n:254.28,data_voltage_y_n:255.17,data_voltage_b_n:257.87,data_voltage_r_y:441.1969,data_voltage_y_b:444.3077,data_voltage_b_r:443.5385,data_kw:0,data_kva:0,data_kvarh:4382.855,data_kwh:4931.525,data_kvah:6881.435,data_pf:1,data_pf_r:1,data_pf_y:1,data_pf_b:1,data_frequency:49.82,running_time_min:0,total_running_hours:0,start_stop_count:0}},
-  {id:"e4677e40-7613-11f1-b06d-0f068c9b61d7",name:"Padariya-Pump-3",type:"Pump",location:"Padariya",active:true,lastActivityTime:1783054210629,createdTime:1782994751244,telemetry:{chip_id:"9855DBF9D108",device_id:"PADARIYAFT-PUMP-3",datetime:"2026-07-02 21:02:50",data_current_r:0,data_current_y:0,data_current_b:0,data_voltage_r_n:247.26,data_voltage_y_n:247.19,data_voltage_b_n:246.31,data_voltage_r_y:428.2062,data_voltage_y_b:427.3837,data_voltage_b_r:427.4444,data_kw:0,data_kva:0,data_kvarh:0,data_kwh:0,data_kvah:0,data_pf:1,data_pf_r:1,data_pf_y:1,data_pf_b:1,data_frequency:49.84,running_time_min:0,total_running_hours:-495277.57,start_stop_count:1}},
-  {id:"f11dad20-750b-11f1-b06d-0f068c9b61d7",name:"Saragvada-FLOW-1",type:"Flow-Meter",location:"Saragvada",active:true,lastActivityTime:1783054195391,createdTime:1782881038184,telemetry:{chip_id:"54889DF9D108",device_id:"Saragwada-FLOW-1",datetime:"2026-07-02 21:03:13",data_flow_rate:2.8,data_flow_total:0.19,data_flow_unit:1,flow_rate:2.7,flow_total:0.17,data_flow_decimal_point:1,data_flow_kilo_flag:0,data_flow_empty_pipe:0,data_flow_over_range:0,data_flow_total_decimal_point:2}},
-  {id:"f3ecaca0-7500-11f1-b06d-0f068c9b61d7",name:"Dolatpara-PUMP-3",type:"Pump",location:"Dolatpara",active:true,lastActivityTime:1783054206439,createdTime:1782877882584,telemetry:{chip_id:"900CDBF9D108",device_id:"Dolatpara-PUMP-3",datetime:"2026-07-02 21:03:16",data_current_r:0,data_current_y:0,data_current_b:0,data_voltage_r_n:254.11,data_voltage_y_n:255.17,data_voltage_b_n:258.02,data_voltage_r_y:441.0497,data_voltage_y_b:444.4378,data_voltage_b_r:443.5219,data_kw:0,data_kva:0,data_kvarh:301.706,data_kwh:380.468,data_kvah:487.52,data_pf:1,data_pf_r:1,data_pf_y:1,data_pf_b:1,data_frequency:49.83,running_time_min:0,total_running_hours:0,start_stop_count:0}},
-  {id:"f5525a50-7504-11f1-b06d-0f068c9b61d7",name:"Saragvada-PUMP-1",type:"Pump",location:"Saragvada",active:true,lastActivityTime:1783054199483,createdTime:1782880075152,telemetry:{chip_id:"E4E09DF9D108",device_id:"Saragvada-PUMP-1",datetime:"2026-07-02 21:03:10",data_current_r:0,data_current_y:0,data_current_b:0,data_voltage_r_n:239.14,data_voltage_y_n:233.55,data_voltage_b_n:239.28,data_voltage_r_y:409.3711,data_voltage_y_b:409.4928,data_voltage_b_r:414.3239,data_kw:0,data_kva:0,data_kvarh:1511.962,data_kwh:3394.639,data_kvah:3792.402,data_pf:1,data_pf_r:1,data_pf_y:1,data_pf_b:1,data_frequency:49.82,running_time_min:0,total_running_hours:-7924275.15,start_stop_count:18}},
-  {id:"fa291fe0-7479-11f1-b06d-0f068c9b61d7",name:"Sardarbag-Pump-3",type:"Pump",location:"Sardarbag",active:true,lastActivityTime:1783054204988,createdTime:1782820340132,telemetry:{chip_id:"38400FB3A3A0",device_id:"Sardarbag-PUMP-3",datetime:"2026-07-02 21:03:13",data_current_r:0,data_current_y:0,data_current_b:0,data_voltage_r_n:244.46,data_voltage_y_n:245.83,data_voltage_b_n:249.34,data_voltage_r_y:424.6042,data_voltage_y_b:428.8334,data_voltage_b_r:427.6503,data_kw:0,data_kva:0,data_kvarh:9301.102,data_kwh:23075.093,data_kvah:25753.08,data_pf:1,data_pf_r:1,data_pf_y:1,data_pf_b:1,data_frequency:49.83,running_time_min:0,total_running_hours:-6933752.1,start_stop_count:14}},
-  {id:"ff89d350-7459-11f1-b06d-0f068c9b61d7",name:"ANANDPUR-FLOW-1",type:"Flow-Meter",location:"Anandpur",active:true,lastActivityTime:1783054201558,createdTime:1782806437612,telemetry:{}},
-  {id:"ff958af0-748c-11f1-b06d-0f068c9b61d7",name:"Varun-Pumping-FLOW-1",type:"Flow-Meter",location:"Varun Pumping",active:false,lastActivityTime:null,createdTime:1782828219992,telemetry:{}}
+  { id: "0599ab60-760f-11f1-b06d-0f068c9b61d7", name: "Padariya-Pump-2", type: "Pump", location: "Padariya", active: true, lastActivityTime: 1783054210463, createdTime: 1782994231574, telemetry: { chip_id: "686F9DF9D108", device_id: "PADARIYAFT-PUMP-2", datetime: "2026-07-02 21:03:10", data_current_r: 1.9393, data_current_y: 1.8583, data_current_b: 2.0529, data_voltage_r_n: 247.33, data_voltage_y_n: 247.42, data_voltage_b_n: 246.35, data_voltage_r_y: 428.4661, data_voltage_y_b: 427.6177, data_voltage_b_r: 427.5397, data_kw: -1.1496, data_kva: 1.4605, data_kvarh: 1.831, data_kwh: 2.403, data_kvah: 3.031, data_pf: -0.7871, data_pf_r: -0.825, data_pf_y: -0.772, data_pf_b: -0.782, data_frequency: 49.83, running_time_min: 20.3, total_running_hours: -1485833.39, start_stop_count: 4 } },
+  { id: "07afffd0-7470-11f1-b06d-0f068c9b61d7", name: "Dharamaveda-Flow-1", type: "Flow-Meter", location: "Dharamaveda", active: true, lastActivityTime: 1783054198205, createdTime: 1782815993933, telemetry: {} },
+  { id: "0ddf82e0-747a-11f1-b06d-0f068c9b61d7", name: "Sardarbag-Pump-4", type: "Pump", location: "Sardarbag", active: true, lastActivityTime: 1783054211493, createdTime: 1782820299278, telemetry: { chip_id: "C0C90FB3A3A0", device_id: "Sardarbag-OLD-PUMP-4", datetime: "2026-07-02 21:03:37", data_current_r: 327.675, data_current_y: 327.675, data_current_b: 327.675, data_voltage_r_n: 655.35, data_voltage_y_n: 655.35, data_voltage_b_n: 655.35, data_voltage_r_y: 1.1351, data_voltage_y_b: 1.1351, data_voltage_b_r: 1.1351, data_kw: 0, data_kva: 0, data_kvarh: 52427768.644, data_kwh: 52462648.646, data_kvah: 25679496.976, data_pf: 1, data_pf_r: -0.001, data_pf_y: -0.001, data_pf_b: -0.001, data_frequency: 655.35, running_time_min: 0, total_running_hours: 0, start_stop_count: 0 } },
+  { id: "30851eb0-748c-11f1-b06d-0f068c9b61d7", name: "Timbavadi-old-Pump-1", type: "Pump", location: "Timbavadi", active: false, lastActivityTime: null, createdTime: 1782828088347, telemetry: {} },
+  { id: "33316280-7456-11f1-b06d-0f068c9b61d7", name: "Anandpur-NEW-Flow-1", type: "Flow-Meter", location: "Anandpur", active: true, lastActivityTime: 1783054189130, createdTime: 1782804900008, telemetry: { chip_id: "000A9DF9D108", device_id: "Anandpur-New-Flow-1", datetime: "2026-07-02 21:03:32", data_flow_rate: 0, data_flow_total: 0, data_flow_unit: 0, data_flow_decimal_point: 0, data_flow_kilo_flag: 0, data_flow_empty_pipe: 0, data_flow_over_range: 0, data_flow_total_decimal_point: 0 } },
+  { id: "378ba800-746e-11f1-b06d-0f068c9b61d7", name: "Dharmaveda-Pump-1", type: "Pump", location: "Dharmaveda", active: true, lastActivityTime: 1783054200469, createdTime: 1782815215232, telemetry: { chip_id: "581DDBF9D108", device_id: "Dharmaveda-PUMP-1", datetime: "2026-07-02 21:03:34", data_current_r: 0, data_current_y: 0, data_current_b: 0, data_voltage_r_n: 238.43, data_voltage_y_n: 231.73, data_voltage_b_n: 237.81, data_voltage_r_y: 407.1843, data_voltage_y_b: 406.645, data_voltage_b_r: 412.436, data_kw: 0, data_kva: 0, data_kvarh: 1292.342, data_kwh: 2400.183, data_kvah: 2737.141, data_pf: 1, data_pf_r: 1, data_pf_y: 1, data_pf_b: 1, data_frequency: 49.83, running_time_min: 0, total_running_hours: -495264.99, start_stop_count: 3 } },
+  { id: "44dfd800-748c-11f1-b06d-0f068c9b61d7", name: "Timbavadi-old-Pump-2", type: "Pump", location: "Timbavadi", active: false, lastActivityTime: null, createdTime: 1782828122496, telemetry: {} },
+  { id: "4ebc4b30-744e-11f1-b06d-0f068c9b61d7", name: "Anandpur-Pump-1", type: "Pump", location: "Anandpur", active: true, lastActivityTime: 1783054200861, createdTime: 1782801510243, telemetry: { chip_id: "5806DBF9D108", device_id: "ANANDPUR-PUMP-1", datetime: "2026-07-02 21:03:09", data_current_r: 0, data_current_y: 0, data_current_b: 0, data_voltage_r_n: 248.75, data_voltage_y_n: 248.67, data_voltage_b_n: 247.14, data_voltage_r_y: 430.7783, data_voltage_y_b: 429.3847, data_voltage_b_r: 429.4541, data_kw: 0, data_kva: 0, data_kvarh: 275492.391, data_kwh: 1115837.587, data_kvah: 1238068.198, data_pf: 1, data_pf_r: 1, data_pf_y: 1, data_pf_b: 1, data_frequency: 49.82, running_time_min: 0, total_running_hours: -1485751.25, start_stop_count: 4 } },
+  { id: "4ed89480-7448-11f1-b06d-0f068c9b61d7", name: "Anandpur-Pump-3", type: "Pump", location: "Anandpur", active: true, lastActivityTime: 1783054198745, createdTime: 1782798933448, telemetry: { chip_id: "2C9D0EB3A3A0", device_id: "ANANDPUR-PUMP-3", datetime: "2026-07-02 21:03:37", data_current_r: 160.56, data_current_y: 153.728, data_current_b: 0, data_voltage_r_n: 248.78, data_voltage_y_n: 248.88, data_voltage_b_n: 247.21, data_voltage_r_y: 430.9862, data_voltage_y_b: 429.6274, data_voltage_b_r: 429.5407, data_kw: 77.8995, data_kva: 78.2516, data_kvarh: 443371.999, data_kwh: 365673.106, data_kvah: 632459.196, data_pf: 0.9955, data_pf_r: 0.994, data_pf_y: 0.996, data_pf_b: 1, data_frequency: 49.82, running_time_min: 20.4, total_running_hours: -2971561.69, start_stop_count: 8 } },
+  { id: "59145100-7452-11f1-b06d-0f068c9b61d7", name: "Anandpur-NEW-Pump-1", type: "Pump", location: "Anandpur", active: true, lastActivityTime: 1783054198236, createdTime: 1782803245584, telemetry: { chip_id: "1CE59CF9D108", device_id: "Anandpur-NEW-Pump-1", datetime: "2026-07-02 21:03:35", data_current_r: 0, data_current_y: 0, data_current_b: 0, data_voltage_r_n: 250.57, data_voltage_y_n: 250.82, data_voltage_b_n: 253.32, data_voltage_r_y: 434.2165, data_voltage_y_b: 436.5998, data_voltage_b_r: 436.3837, data_kw: 0, data_kva: 0, data_kvarh: 328611.323, data_kwh: 621367.737, data_kvah: 705130.217, data_pf: 1, data_pf_r: 1, data_pf_y: 1, data_pf_b: 1, data_frequency: 49.83, running_time_min: 0, total_running_hours: -495262.57, start_stop_count: 2 } },
+  { id: "5b98cca0-748c-11f1-b06d-0f068c9b61d7", name: "Timbavadi-old-Pump-3", type: "Pump", location: "Timbavadi", active: false, lastActivityTime: null, createdTime: 1782828160618, telemetry: {} },
+  { id: "62a41a70-747a-11f1-b06d-0f068c9b61d7", name: "Sardarbag-FLOW-1", type: "Flow-Meter", location: "Sardarbag", active: false, lastActivityTime: null, createdTime: 1782820441495, telemetry: {} },
+  { id: "6c4ba8a0-7505-11f1-b06d-0f068c9b61d7", name: "Saragvada-PUMP-2", type: "Pump", location: "Saragvada", active: false, lastActivityTime: null, createdTime: 1782880157738, telemetry: {} },
+  { id: "6dff0680-751c-11f1-b06d-0f068c9b61d7", name: "AdityNager-PUMP-3", type: "Pump", location: "Adityanagar", active: true, lastActivityTime: 1783054189768, createdTime: 1782890039016, telemetry: { chip_id: "F03F9EF9D108", device_id: "Aditynagar-PUMP-3", datetime: "2026-07-02 21:03:28", data_current_r: 0, data_current_y: 0, data_current_b: 0, data_voltage_r_n: 255.48, data_voltage_y_n: 254.97, data_voltage_b_n: 257.6, data_voltage_r_y: 442.0627, data_voltage_y_b: 443.9006, data_voltage_b_r: 444.3416, data_kw: 0, data_kva: 0, data_kvarh: 15.623, data_kwh: 9.18, data_kvah: 20.724, data_pf: 1, data_pf_r: 1, data_pf_y: 1, data_pf_b: 1, data_frequency: 49.82, running_time_min: 0, total_running_hours: 0, start_stop_count: 0 } },
+  { id: "6f21ea70-7452-11f1-b06d-0f068c9b61d7", name: "Anandpur-NEW-Pump-2", type: "Pump", location: "Anandpur", active: true, lastActivityTime: 1783054200996, createdTime: 1782803282583, telemetry: { chip_id: "3C080FB3A3A0", device_id: "ANANDPUR-NEW-PUMP-2", datetime: "2026-07-02 21:03:11", data_current_r: 151.2, data_current_y: 156.336, data_current_b: 158.208, data_voltage_r_n: 250.43, data_voltage_y_n: 250.85, data_voltage_b_n: 253.34, data_voltage_r_y: 434.1212, data_voltage_y_b: 436.6431, data_voltage_b_r: 436.28, data_kw: 103.4431, data_kva: 117.0536, data_kvarh: 149330.679, data_kwh: 283727.792, data_kvah: 321752.631, data_pf: 0.8837, data_pf_r: 0.901, data_pf_y: 0.875, data_pf_b: 0.877, data_frequency: 49.83, running_time_min: 332.6, total_running_hours: -990499.67, start_stop_count: 4 } },
+  { id: "7133a190-7601-11f1-b06d-0f068c9b61d7", name: "PadariyaFT-Flow", type: "Flow-Meter", location: "Padariya", active: true, lastActivityTime: 1783054205647, createdTime: 1782988399145, telemetry: { chip_id: "98EC9DF9D108", device_id: "PADARIYAFT-FLOW", datetime: "2026-07-02 21:03:20", data_flow_rate: 0, data_flow_total: 0, data_flow_unit: 1, data_flow_decimal_point: 1, data_flow_kilo_flag: 0, data_flow_empty_pipe: 0, data_flow_over_range: 0, data_flow_total_decimal_point: 3 } },
+  { id: "723ef3f0-7539-11f1-b06d-0f068c9b61d7", name: "Khamdhrol-FLOW-1", type: "Flow-Meter", location: "Khamdhrol", active: true, lastActivityTime: 1783054215094, createdTime: 1782899052336, telemetry: { chip_id: "EC329EF9D108", device_id: "Khamdhrol-FLOW-1", datetime: "2026-07-02 21:03:24", data_flow_rate: 0, data_flow_total: 0, data_flow_unit: 1, data_flow_decimal_point: 1, data_flow_kilo_flag: 0, data_flow_empty_pipe: 0, data_flow_over_range: 0, data_flow_total_decimal_point: 3 } },
+  { id: "79a2a190-7490-11f1-b06d-0f068c9b61d7", name: "Gopalwadi", type: "Flow-Meter", location: "Gopalwadi", active: false, lastActivityTime: null, createdTime: 1782830368714, telemetry: { chip_id: "5C9E9DF9D108", device_id: "GOPALWADI-FLOW", datetime: "2026-07-02 21:03:16", data_flow_rate: 0, data_flow_total: 0, data_flow_unit: 1, data_flow_decimal_point: 1, data_flow_kilo_flag: 0, data_flow_empty_pipe: 0, data_flow_over_range: 0, data_flow_total_decimal_point: 3 } },
+  { id: "7afed300-748c-11f1-b06d-0f068c9b61d7", name: "Timbavadi-old-FLOW-1", type: "Flow-Meter", location: "Timbavadi", active: true, lastActivityTime: 1783054197699, createdTime: 1782828202912, telemetry: {} },
+  { id: "7f2d6fd0-7500-11f1-b06d-0f068c9b61d7", name: "Dolatpara-PUMP-1", type: "Pump", location: "Dolatpara", active: true, lastActivityTime: 1783054215840, createdTime: 1782877760284, telemetry: { chip_id: "98399CF9D108", device_id: "Dolatpara-PUMP-1", datetime: "2026-07-02 21:03:08", data_current_r: 0, data_current_y: 0, data_current_b: 0, data_voltage_r_n: 254.44, data_voltage_y_n: 255.27, data_voltage_b_n: 257.96, data_voltage_r_y: 441.2939, data_voltage_y_b: 444.4089, data_voltage_b_r: 443.5564, data_kw: 0, data_kva: 0, data_kvarh: 6655.22, data_kwh: 7555.305, data_kvah: 10109.609, data_pf: 1, data_pf_r: 1, data_pf_y: 1, data_pf_b: 1, data_frequency: 49.83, running_time_min: 0, total_running_hours: 0, start_stop_count: 0 } },
+  { id: "828d29f0-746e-11f1-b06d-0f068c9b61d7", name: "Dharmaveda-Pump-2", type: "Pump", location: "Dharmaveda", active: true, lastActivityTime: 1783054196076, createdTime: 1782815319260, telemetry: { chip_id: "44D89DF9D108", device_id: "Dharmaveda-PUMP-2", datetime: "2026-07-02 21:03:04", data_current_r: 0, data_current_y: 0, data_current_b: 0, data_voltage_r_n: 238.66, data_voltage_y_n: 232.05, data_voltage_b_n: 237.86, data_voltage_r_y: 407.6602, data_voltage_y_b: 406.9644, data_voltage_b_r: 412.6786, data_kw: 0, data_kva: 0, data_kvarh: 1051.65, data_kwh: 2013.865, data_kvah: 2280.095, data_pf: 1, data_pf_r: 1, data_pf_y: 1, data_pf_b: 1, data_frequency: 49.82, running_time_min: 0, total_running_hours: -495264.98, start_stop_count: 3 } },
+  { id: "8331b0e0-747a-11f1-b06d-0f068c9b61d7", name: "Sardarbag-FLOW-2", type: "Flow-Meter", location: "Sardarbag", active: false, lastActivityTime: null, createdTime: 1782820499668, telemetry: {} },
+  { id: "85d39bc0-7505-11f1-b06d-0f068c9b61d7", name: "Saragvada-PUMP-3", type: "Pump", location: "Saragvada", active: false, lastActivityTime: null, createdTime: 1782880233316, telemetry: {} },
+  { id: "8aa06ea0-751c-11f1-b06d-0f068c9b61d7", name: "AdityNager-PUMP-2", type: "Pump", location: "Adityanagar", active: true, lastActivityTime: 1783054196766, createdTime: 1782889925004, telemetry: { chip_id: "2C3A9CF9D108", device_id: "Aditynagar-PUMP-2", datetime: "2026-07-02 21:03:05", data_current_r: 0, data_current_y: 0, data_current_b: 0, data_voltage_r_n: 255.54, data_voltage_y_n: 254.9, data_voltage_b_n: 257.64, data_voltage_r_y: 442.0541, data_voltage_y_b: 443.8748, data_voltage_b_r: 444.4281, data_kw: 0, data_kva: 0, data_kvarh: 156920.393, data_kwh: 8003.811, data_kvah: 157698.67, data_pf: 1, data_pf_r: 1, data_pf_y: 1, data_pf_b: 1, data_frequency: 49.82, running_time_min: 0, total_running_hours: 1.81, start_stop_count: 2 } },
+  { id: "8e33f2a0-753d-11f1-b06d-0f068c9b61d7", name: "Khamdhrol-Pump-1", type: "Pump", location: "Khamdhrol", active: true, lastActivityTime: 1783054190606, createdTime: 1782901016348, telemetry: { chip_id: "840A9CF9D108", device_id: "Khamdhrol-Pump-1", datetime: "2026-07-02 21:03:00", data_current_r: 0, data_current_y: 0, data_current_b: 0, data_voltage_r_n: 0, data_voltage_y_n: 0, data_voltage_b_n: 0, data_voltage_r_y: 0, data_voltage_y_b: 0, data_voltage_b_r: 0, data_kw: 0, data_kva: 0, data_kvarh: 0, data_kwh: 0, data_kvah: 0, data_pf: 0, data_pf_r: 0, data_pf_y: 0, data_pf_b: 0, data_frequency: 0, running_time_min: 0, total_running_hours: 0, start_stop_count: 0 } },
+  { id: "9702e740-751c-11f1-b06d-0f068c9b61d7", name: "AdityNager-PUMP-1", type: "Pump", location: "Adityanagar", active: true, lastActivityTime: 1783054199001, createdTime: 1782889763968, telemetry: {} },
+  { id: "97838700-746e-11f1-b06d-0f068c9b61d7", name: "Dharmaveda-Pump-3", type: "Pump", location: "Dharmaveda", active: false, lastActivityTime: null, createdTime: 1782815342952, telemetry: {} },
+  { id: "a906b550-7479-11f1-b06d-0f068c9b61d7", name: "Sardarbag-Pump-1", type: "Pump", location: "Sardarbag", active: true, lastActivityTime: 1783054217900, createdTime: 1782820242048, telemetry: { chip_id: "78E6DAF9D108", device_id: "Sardarbag-PUMP-1", datetime: "2026-07-02 21:02:49", data_current_r: 0, data_current_y: 0, data_current_b: 0, data_voltage_r_n: 244.22, data_voltage_y_n: 245.68, data_voltage_b_n: 249.08, data_voltage_r_y: 424.2664, data_voltage_y_b: 428.4781, data_voltage_b_r: 427.2172, data_kw: 0, data_kva: 0, data_kvarh: 20287.586, data_kwh: 36567.969, data_kvah: 42504.952, data_pf: 1, data_pf_r: 1, data_pf_y: 1, data_pf_b: 1, data_frequency: 49.84, running_time_min: 0, total_running_hours: 3.26, start_stop_count: 1 } },
+  { id: "aeafd8d0-751c-11f1-b06d-0f068c9b61d7", name: "AdityNager-FLOW-1", type: "Flow-Meter", location: "Adityanagar", active: true, lastActivityTime: 1783053781290, createdTime: 1782890162340, telemetry: { chip_id: "1C58DBF9D108", device_id: "ADITYANAGAR-FLOW", datetime: "2026-07-02 09:03:56", data_flow_rate: 0, data_flow_total: 0, data_flow_unit: 1, flow_rate: 0, flow_total: 0, data_flow_decimal_point: 1, data_flow_kilo_flag: 0, data_flow_empty_pipe: 0, data_flow_over_range: 0, data_flow_total_decimal_point: 3 } },
+  { id: "c2782730-760e-11f1-b06d-0f068c9b61d7", name: "Padariya-Pump-1", type: "Pump", location: "Padariya", active: true, lastActivityTime: 1783054210902, createdTime: 1782994052424, telemetry: { chip_id: "74AF93F9D108", device_id: "PADARIYAFT-PUMP-1", datetime: "2026-07-02 21:02:48", data_current_r: 0, data_current_y: 0, data_current_b: 0, data_voltage_r_n: 247.31, data_voltage_y_n: 247.6, data_voltage_b_n: 246.21, data_voltage_r_y: 428.6047, data_voltage_y_b: 427.6526, data_voltage_b_r: 427.4012, data_kw: 0, data_kva: 0, data_kvarh: 94533.18, data_kwh: 10730.115, data_kvah: 95561.476, data_pf: 1, data_pf_r: 1, data_pf_y: 1, data_pf_b: 1, data_frequency: 49.83, running_time_min: 0, total_running_hours: 0, start_stop_count: 0 } },
+  { id: "e08392a0-7479-11f1-b06d-0f068c9b61d7", name: "Sardarbag-Pump-2", type: "Pump", location: "Sardarbag", active: true, lastActivityTime: 1783054212455, createdTime: 1782820274856, telemetry: { chip_id: "B0079CF9D108", device_id: "Sardarbag-PUMP-2", datetime: "2026-07-02 21:03:12", data_current_r: 0, data_current_y: 0, data_current_b: 0, data_voltage_r_n: 244.23, data_voltage_y_n: 245.57, data_voltage_b_n: 249.15, data_voltage_r_y: 424.1798, data_voltage_y_b: 428.4438, data_voltage_b_r: 427.2867, data_kw: 0, data_kva: 0, data_kvarh: 2681.639, data_kwh: 6063.986, data_kvah: 6774.303, data_pf: 1, data_pf_r: 1, data_pf_y: 1, data_pf_b: 1, data_frequency: 49.82, running_time_min: 0, total_running_hours: 0, start_stop_count: 0 } },
+  { id: "e263dd70-744f-11f1-b06d-0f068c9b61d7", name: "Anandpur-Pump-2", type: "Pump", location: "Anandpur", active: true, lastActivityTime: 1783054196216, createdTime: 1782801598784, telemetry: { chip_id: "10F5DBF9D108", device_id: "ANANDPUR-PUMP-2", datetime: "2026-07-02 21:03:07", data_current_r: 153.968, data_current_y: 152.96, data_current_b: 0, data_voltage_r_n: 248.81, data_voltage_y_n: 248.77, data_voltage_b_n: 247.05, data_voltage_r_y: 430.9169, data_voltage_y_b: 429.3936, data_voltage_b_r: 429.4283, data_kw: -75.8881, data_kva: 76.2548, data_kvarh: 385837.434, data_kwh: 285056.181, data_kvah: 524626.575, data_pf: -0.9952, data_pf_r: -0.995, data_pf_y: -0.995, data_pf_b: 1, data_frequency: 49.82, running_time_min: 825.2, total_running_hours: -495254.73, start_stop_count: 3 } },
+  { id: "e44bd1e0-7500-11f1-b06d-0f068c9b61d7", name: "Dolatpara-PUMP-2", type: "Pump", location: "Dolatpara", active: true, lastActivityTime: 1783054217699, createdTime: 1782877834800, telemetry: { chip_id: "44349CF9D108", device_id: "Dolatpara-PUMP-2", datetime: "2026-07-02 21:03:06", data_current_r: 0, data_current_y: 0, data_current_b: 0, data_voltage_r_n: 254.28, data_voltage_y_n: 255.17, data_voltage_b_n: 257.87, data_voltage_r_y: 441.1969, data_voltage_y_b: 444.3077, data_voltage_b_r: 443.5385, data_kw: 0, data_kva: 0, data_kvarh: 4382.855, data_kwh: 4931.525, data_kvah: 6881.435, data_pf: 1, data_pf_r: 1, data_pf_y: 1, data_pf_b: 1, data_frequency: 49.82, running_time_min: 0, total_running_hours: 0, start_stop_count: 0 } },
+  { id: "e4677e40-7613-11f1-b06d-0f068c9b61d7", name: "Padariya-Pump-3", type: "Pump", location: "Padariya", active: true, lastActivityTime: 1783054210629, createdTime: 1782994751244, telemetry: { chip_id: "9855DBF9D108", device_id: "PADARIYAFT-PUMP-3", datetime: "2026-07-02 21:02:50", data_current_r: 0, data_current_y: 0, data_current_b: 0, data_voltage_r_n: 247.26, data_voltage_y_n: 247.19, data_voltage_b_n: 246.31, data_voltage_r_y: 428.2062, data_voltage_y_b: 427.3837, data_voltage_b_r: 427.4444, data_kw: 0, data_kva: 0, data_kvarh: 0, data_kwh: 0, data_kvah: 0, data_pf: 1, data_pf_r: 1, data_pf_y: 1, data_pf_b: 1, data_frequency: 49.84, running_time_min: 0, total_running_hours: -495277.57, start_stop_count: 1 } },
+  { id: "f11dad20-750b-11f1-b06d-0f068c9b61d7", name: "Saragvada-FLOW-1", type: "Flow-Meter", location: "Saragvada", active: true, lastActivityTime: 1783054195391, createdTime: 1782881038184, telemetry: { chip_id: "54889DF9D108", device_id: "Saragwada-FLOW-1", datetime: "2026-07-02 21:03:13", data_flow_rate: 2.8, data_flow_total: 0.19, data_flow_unit: 1, flow_rate: 2.7, flow_total: 0.17, data_flow_decimal_point: 1, data_flow_kilo_flag: 0, data_flow_empty_pipe: 0, data_flow_over_range: 0, data_flow_total_decimal_point: 2 } },
+  { id: "f3ecaca0-7500-11f1-b06d-0f068c9b61d7", name: "Dolatpara-PUMP-3", type: "Pump", location: "Dolatpara", active: true, lastActivityTime: 1783054206439, createdTime: 1782877882584, telemetry: { chip_id: "900CDBF9D108", device_id: "Dolatpara-PUMP-3", datetime: "2026-07-02 21:03:16", data_current_r: 0, data_current_y: 0, data_current_b: 0, data_voltage_r_n: 254.11, data_voltage_y_n: 255.17, data_voltage_b_n: 258.02, data_voltage_r_y: 441.0497, data_voltage_y_b: 444.4378, data_voltage_b_r: 443.5219, data_kw: 0, data_kva: 0, data_kvarh: 301.706, data_kwh: 380.468, data_kvah: 487.52, data_pf: 1, data_pf_r: 1, data_pf_y: 1, data_pf_b: 1, data_frequency: 49.83, running_time_min: 0, total_running_hours: 0, start_stop_count: 0 } },
+  { id: "f5525a50-7504-11f1-b06d-0f068c9b61d7", name: "Saragvada-PUMP-1", type: "Pump", location: "Saragvada", active: true, lastActivityTime: 1783054199483, createdTime: 1782880075152, telemetry: { chip_id: "E4E09DF9D108", device_id: "Saragvada-PUMP-1", datetime: "2026-07-02 21:03:10", data_current_r: 0, data_current_y: 0, data_current_b: 0, data_voltage_r_n: 239.14, data_voltage_y_n: 233.55, data_voltage_b_n: 239.28, data_voltage_r_y: 409.3711, data_voltage_y_b: 409.4928, data_voltage_b_r: 414.3239, data_kw: 0, data_kva: 0, data_kvarh: 1511.962, data_kwh: 3394.639, data_kvah: 3792.402, data_pf: 1, data_pf_r: 1, data_pf_y: 1, data_pf_b: 1, data_frequency: 49.82, running_time_min: 0, total_running_hours: -7924275.15, start_stop_count: 18 } },
+  { id: "fa291fe0-7479-11f1-b06d-0f068c9b61d7", name: "Sardarbag-Pump-3", type: "Pump", location: "Sardarbag", active: true, lastActivityTime: 1783054204988, createdTime: 1782820340132, telemetry: { chip_id: "38400FB3A3A0", device_id: "Sardarbag-PUMP-3", datetime: "2026-07-02 21:03:13", data_current_r: 0, data_current_y: 0, data_current_b: 0, data_voltage_r_n: 244.46, data_voltage_y_n: 245.83, data_voltage_b_n: 249.34, data_voltage_r_y: 424.6042, data_voltage_y_b: 428.8334, data_voltage_b_r: 427.6503, data_kw: 0, data_kva: 0, data_kvarh: 9301.102, data_kwh: 23075.093, data_kvah: 25753.08, data_pf: 1, data_pf_r: 1, data_pf_y: 1, data_pf_b: 1, data_frequency: 49.83, running_time_min: 0, total_running_hours: -6933752.1, start_stop_count: 14 } },
+  { id: "ff89d350-7459-11f1-b06d-0f068c9b61d7", name: "ANANDPUR-FLOW-1", type: "Flow-Meter", location: "Anandpur", active: true, lastActivityTime: 1783054201558, createdTime: 1782806437612, telemetry: {} },
+  { id: "ff958af0-748c-11f1-b06d-0f068c9b61d7", name: "Varun-Pumping-FLOW-1", type: "Flow-Meter", location: "Varun Pumping", active: false, lastActivityTime: null, createdTime: 1782828219992, telemetry: {} }
 ];
 
 
@@ -109,20 +109,20 @@ const DEVICES_DATA = [
 
 /** @type {Object} state - Global UI state */
 const state = {
-  theme          : localStorage.getItem('iot-theme') || 'dark',
-  filter         : 'all',          // 'all'|'running'|'standby'|'online'|'offline'|'no-data'
-  typeFilter     : 'all',          // 'all'|'Pump'|'Flow-Meter'
-  locationFilter : 'all',          // 'all'|<location string>
-  search         : '',             // free-text search
-  view           : 'grid',         // 'grid'|'list'
-  sortBy         : 'name',         // 'name'|'status'|'location'|'kw'
-  sortDir        : 'asc',          // 'asc'|'desc'
-  lastUpdated    : new Date('2026-07-02T21:03:37+05:30'),  // timestamp of last data sync
-  apiToken       : null,           // JWT from ThingsBoard login
-  isFetching     : false,          // true while an API call is in progress
-  nextRefreshAt  : null,           // Date of next scheduled refresh
-  refreshTimer   : null,           // setInterval handle
-  countdownTimer : null            // setInterval handle for countdown display
+  theme: localStorage.getItem('iot-theme') || 'dark',
+  filter: 'all',          // 'all'|'running'|'standby'|'online'|'offline'|'no-data'
+  typeFilter: 'all',          // 'all'|'Pump'|'Flow-Meter'
+  locationFilter: 'all',          // 'all'|<location string>
+  search: '',             // free-text search
+  view: 'grid',         // 'grid'|'list'
+  sortBy: 'name',         // 'name'|'status'|'location'|'kw'
+  sortDir: 'asc',          // 'asc'|'desc'
+  lastUpdated: new Date('2026-07-02T21:03:37+05:30'),  // timestamp of last data sync
+  apiToken: null,           // JWT from ThingsBoard login
+  isFetching: false,          // true while an API call is in progress
+  nextRefreshAt: null,           // Date of next scheduled refresh
+  refreshTimer: null,           // setInterval handle
+  countdownTimer: null            // setInterval handle for countdown display
 };
 
 /**
@@ -142,16 +142,16 @@ function getLocations() {
  * @used-in  renderStats(), donut chart
  */
 function getStats() {
-  const total      = DEVICES_DATA.length;
-  const pumps      = DEVICES_DATA.filter(d => d.type === 'Pump').length;
+  const total = DEVICES_DATA.length;
+  const pumps = DEVICES_DATA.filter(d => d.type === 'Pump').length;
   const flowMeters = total - pumps;
-  const running    = DEVICES_DATA.filter(d => getDeviceState(d) === 'running').length;
-  const standby    = DEVICES_DATA.filter(d => getDeviceState(d) === 'standby').length;
-  const offline    = DEVICES_DATA.filter(d => getDeviceState(d) === 'offline').length;
-  const noData     = DEVICES_DATA.filter(d => getDeviceState(d) === 'no-data').length;
-  const online     = running + standby;
-  const totalKW    = DEVICES_DATA.reduce((s, d) => s + Math.abs(parseFloat(d.telemetry.data_kw) || 0), 0);
-  const totalKWH   = DEVICES_DATA.reduce((s, d) => {
+  const running = DEVICES_DATA.filter(d => getDeviceState(d) === 'running').length;
+  const standby = DEVICES_DATA.filter(d => getDeviceState(d) === 'standby').length;
+  const offline = DEVICES_DATA.filter(d => getDeviceState(d) === 'offline').length;
+  const noData = DEVICES_DATA.filter(d => getDeviceState(d) === 'no-data').length;
+  const online = running + standby;
+  const totalKW = DEVICES_DATA.reduce((s, d) => s + Math.abs(parseFloat(d.telemetry.data_kw) || 0), 0);
+  const totalKWH = DEVICES_DATA.reduce((s, d) => {
     const v = parseFloat(d.telemetry.data_kwh) || 0;
     return s + (v < 1e7 ? v : 0);  // exclude absurd meter values
   }, 0);
@@ -169,11 +169,11 @@ function getFilteredDevices() {
 
   // ── Status filter (6 modes) ──
   const ds = x => getDeviceState(x);
-  if      (state.filter === 'running')  d = d.filter(x => ds(x) === 'running');
-  else if (state.filter === 'standby')  d = d.filter(x => ds(x) === 'standby');
-  else if (state.filter === 'online')   d = d.filter(x => ds(x) === 'running' || ds(x) === 'standby');
-  else if (state.filter === 'offline')  d = d.filter(x => ds(x) === 'offline');
-  else if (state.filter === 'no-data')  d = d.filter(x => ds(x) === 'no-data');
+  if (state.filter === 'running') d = d.filter(x => ds(x) === 'running');
+  else if (state.filter === 'standby') d = d.filter(x => ds(x) === 'standby');
+  else if (state.filter === 'online') d = d.filter(x => ds(x) === 'running' || ds(x) === 'standby');
+  else if (state.filter === 'offline') d = d.filter(x => ds(x) === 'offline');
+  else if (state.filter === 'no-data') d = d.filter(x => ds(x) === 'no-data');
 
   // ── Type filter ──
   if (state.typeFilter !== 'all') d = d.filter(x => x.type === state.typeFilter);
@@ -194,9 +194,9 @@ function getFilteredDevices() {
   // ── Sort ──
   d.sort((a, b) => {
     let va, vb;
-    if      (state.sortBy === 'name')     { va = a.name;     vb = b.name; }
+    if (state.sortBy === 'name') { va = a.name; vb = b.name; }
     else if (state.sortBy === 'location') { va = a.location; vb = b.location; }
-    else if (state.sortBy === 'kw')       {
+    else if (state.sortBy === 'kw') {
       va = Math.abs(parseFloat(a.telemetry.data_kw) || 0);
       vb = Math.abs(parseFloat(b.telemetry.data_kw) || 0);
     }
@@ -242,8 +242,8 @@ function formatTime(ts) {
 function timeSince(ts) {
   if (!ts) return 'N/A';
   const diff = Date.now() - ts;
-  const m    = Math.floor(diff / 60000);
-  if (m < 1)  return 'just now';
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'just now';
   if (m < 60) return m + 'm ago';
   const h = Math.floor(m / 60);
   if (h < 24) return h + 'h ago';
@@ -285,7 +285,7 @@ function getPFColor(pf) {
 function getVoltageStatus(v) {
   const val = parseFloat(v) || 0;
   if (val >= 220 && val <= 265) return 'normal';
-  if (val > 0 && val < 220)    return 'warning';
+  if (val > 0 && val < 220) return 'warning';
   return 'idle';
 }
 
@@ -297,17 +297,17 @@ function getVoltageStatus(v) {
  */
 function locIcon(loc) {
   return ({
-    'Anandpur'     : '🏘️',
-    'Sardarbag'    : '🌿',
-    'Dharmaveda'   : '⚡',
-    'Dharamaveda'  : '⚡',
-    'Saragvada'    : '💧',
-    'Padariya'     : '🔧',
-    'Dolatpara'    : '🏭',
-    'Timbavadi'    : '⚙️',
-    'Adityanagar'  : '🌆',
-    'Khamdhrol'    : '🔩',
-    'Gopalwadi'    : '🌊',
+    'Anandpur': '🏘️',
+    'Sardarbag': '🌿',
+    'Dharmaveda': '⚡',
+    'Dharamaveda': '⚡',
+    'Saragvada': '💧',
+    'Padariya': '🔧',
+    'Dolatpara': '🏭',
+    'Timbavadi': '⚙️',
+    'Adityanagar': '🌆',
+    'Khamdhrol': '🔩',
+    'Gopalwadi': '🌊',
     'Varun Pumping': '💦'
   }[loc] || '📍');
 }
@@ -361,7 +361,7 @@ function refreshSVG(w = 18) {
  */
 function getDeviceState(device) {
   const hasTelemetry = Object.keys(device.telemetry).length > 0;
-  if (!hasTelemetry)  return 'no-data';   // No data at all – not configured
+  if (!hasTelemetry) return 'no-data';   // No data at all – not configured
   if (!device.active) return 'offline';   // Had data but now disconnected
   if (device.type === 'Pump' && Math.abs(parseFloat(device.telemetry.data_kw) || 0) > 0)
     return 'running';                     // Actively pumping
@@ -373,9 +373,9 @@ function getDeviceState(device) {
  * @used-in  DeviceCard(), ModalContent(), filter button text
  */
 const STATE_LABEL = {
-  running : 'Running',
-  standby : 'Standby',
-  offline : 'Offline',
+  running: 'Running',
+  standby: 'Standby',
+  offline: 'Offline',
   'no-data': 'Not Configured'
 };
 
@@ -384,9 +384,9 @@ const STATE_LABEL = {
  * @used-in  ToastNotification(), page title updates
  */
 const STATE_ICON = {
-  running : '⚡',
-  standby : '✅',
-  offline : '📴',
+  running: '⚡',
+  standby: '✅',
+  offline: '📴',
   'no-data': '⚠️'
 };
 
@@ -450,18 +450,18 @@ function MetricBlock({ label, value, unit = '', cls = '', style = '', wide = fal
  */
 function PumpMetrics(tel, isRunning) {
   const vRN = parseFloat(tel.data_voltage_r_n) || 0;
-  const cur = parseFloat(tel.data_current_r)   || 0;
-  const kw  = Math.abs(parseFloat(tel.data_kw) || 0);
-  const pf  = parseFloat(tel.data_pf)          || 0;
-  const hz  = parseFloat(tel.data_frequency)   || 0;
+  const cur = parseFloat(tel.data_current_r) || 0;
+  const kw = Math.abs(parseFloat(tel.data_kw) || 0);
+  const pf = parseFloat(tel.data_pf) || 0;
+  const hz = parseFloat(tel.data_frequency) || 0;
   return `
 <div class="card-metrics">
-  ${MetricBlock({ label:'V R-N',    value: fmtNum(vRN,1),            unit:'V',   cls: getVoltageStatus(vRN) })}
-  ${MetricBlock({ label:'Current',  value: fmtNum(cur,2),            unit:'A' })}
-  ${MetricBlock({ label:'Power',    value: fmtNum(kw,2),             unit:'kW',  cls: isRunning ? 'val-running' : '' })}
-  ${MetricBlock({ label:'P.Factor', value: fmtNum(Math.abs(pf),3),              style:`color:${getPFColor(pf)}` })}
-  ${MetricBlock({ label:'Freq',     value: fmtNum(hz,2),             unit:'Hz' })}
-  ${MetricBlock({ label:'Energy',   value: fmtNum(tel.data_kwh,1),   unit:'kWh' })}
+  ${MetricBlock({ label: 'V R-N', value: fmtNum(vRN, 1), unit: 'V', cls: getVoltageStatus(vRN) })}
+  ${MetricBlock({ label: 'Current', value: fmtNum(cur, 2), unit: 'A' })}
+  ${MetricBlock({ label: 'Power', value: fmtNum(kw, 2), unit: 'kW', cls: isRunning ? 'val-running' : '' })}
+  ${MetricBlock({ label: 'P.Factor', value: fmtNum(Math.abs(pf), 3), style: `color:${getPFColor(pf)}` })}
+  ${MetricBlock({ label: 'Freq', value: fmtNum(hz, 2), unit: 'Hz' })}
+  ${MetricBlock({ label: 'Energy', value: fmtNum(tel.data_kwh, 1), unit: 'kWh' })}
 </div>`;
 }
 
@@ -473,12 +473,12 @@ function PumpMetrics(tel, isRunning) {
  * @used-in  DeviceCard()
  */
 function FlowMetrics(tel) {
-  const fr = parseFloat(tel.data_flow_rate)  || parseFloat(tel.flow_rate)  || 0;
+  const fr = parseFloat(tel.data_flow_rate) || parseFloat(tel.flow_rate) || 0;
   const ft = parseFloat(tel.data_flow_total) || parseFloat(tel.flow_total) || 0;
   return `
 <div class="card-metrics">
-  ${MetricBlock({ label:'Flow Rate',  value: fmtNum(fr,3), unit:'m³/h', cls:'flow-val', wide: true })}
-  ${MetricBlock({ label:'Total Flow', value: fmtNum(ft,3), unit:'m³',                   wide: true })}
+  ${MetricBlock({ label: 'Flow Rate', value: fmtNum(fr, 3), unit: 'm³/h', cls: 'flow-val', wide: true })}
+  ${MetricBlock({ label: 'Total Flow', value: fmtNum(ft, 3), unit: 'm³', wide: true })}
 </div>`;
 }
 
@@ -512,12 +512,12 @@ function NoDataBlock() {
  * @example  grid.innerHTML = devices.map(d => DeviceCard(d)).join('');
  */
 function DeviceCard(device) {
-  const isPump    = device.type === 'Pump';
-  const hasTel    = Object.keys(device.telemetry).length > 0;
-  const devState  = getDeviceState(device);
+  const isPump = device.type === 'Pump';
+  const hasTel = Object.keys(device.telemetry).length > 0;
+  const devState = getDeviceState(device);
   const isRunning = devState === 'running';
-  const typeIcon  = isPump ? pumpSVG() : flowSVG();
-  const typeTag   = isPump
+  const typeIcon = isPump ? pumpSVG() : flowSVG();
+  const typeTag = isPump
     ? `<div class="card-type-tag tag-pump">⚙️ Pump · AVH 14-M1-E3-N1</div>`
     : `<div class="card-type-tag tag-flow">💧 Flow Meter</div>`;
 
@@ -528,15 +528,10 @@ function DeviceCard(device) {
       ? PumpMetrics(device.telemetry, isRunning)
       : FlowMetrics(device.telemetry);
 
-  const anomalyStr = typeof getAnomalyReasons === 'function' ? getAnomalyReasons(device) : '—';
-  const anomalyBadge = anomalyStr !== '—'
-    ? `<div class="card-anomaly-flag" title="Issues: ${anomalyStr}">⚠️</div>`
-    : '';
-
   return `
 <div class="device-card ${devState}" data-id="${device.id}" tabindex="0" role="button"
      aria-label="${device.name} – ${STATE_LABEL[devState]}">
-  ${anomalyBadge}
+
   <!-- Card Header: icon · name · location · status badge -->
   <div class="card-header">
     <div class="card-icon ${isPump ? 'icon-pump' : 'icon-flow'}">${typeIcon}</div>
@@ -593,9 +588,9 @@ function TelemetrySection(title, rows) {
  * @example  document.getElementById('modal-content').innerHTML = ModalContent(device);
  */
 function ModalContent(device) {
-  const isPump   = device.type === 'Pump';
-  const tel      = device.telemetry;
-  const hasTel   = Object.keys(tel).length > 0;
+  const isPump = device.type === 'Pump';
+  const tel = device.telemetry;
+  const hasTel = Object.keys(tel).length > 0;
   const devState = getDeviceState(device);
 
   // ── Modal header ──
@@ -613,12 +608,12 @@ function ModalContent(device) {
 
   // ── Meta grid (device identity info) ──
   const metaItems = [
-    ['Device ID',    tel.device_id || '—'],
-    ['Chip ID',      tel.chip_id   || '—'],
+    ['Device ID', tel.device_id || '—'],
+    ['Chip ID', tel.chip_id || '—'],
     ['Last Activity', formatTime(device.lastActivityTime)],
-    ['Registered',   formatTime(device.createdTime)],
-    ['Telemetry At', tel.datetime  || '—'],
-    ['Device Type',  device.type]
+    ['Registered', formatTime(device.createdTime)],
+    ['Telemetry At', tel.datetime || '—'],
+    ['Device Type', device.type]
   ];
   const metaHTML = `
 <div class="modal-meta">
@@ -642,33 +637,33 @@ function ModalContent(device) {
 <h3 class="section-title">📡 Latest Telemetry</h3>
 <div class="telemetry-grid">
   ${TelemetrySection('⚡ Electrical', [
-    ['Voltage R-N',   fmtNum(tel.data_voltage_r_n, 2) + ' V'],
-    ['Voltage Y-N',   fmtNum(tel.data_voltage_y_n, 2) + ' V'],
-    ['Voltage B-N',   fmtNum(tel.data_voltage_b_n, 2) + ' V'],
-    ['Voltage R-Y',   fmtNum(tel.data_voltage_r_y, 2) + ' V'],
-    ['Voltage Y-B',   fmtNum(tel.data_voltage_y_b, 2) + ' V'],
-    ['Voltage B-R',   fmtNum(tel.data_voltage_b_r, 2) + ' V'],
-    ['Current R',     fmtNum(tel.data_current_r, 3) + ' A'],
-    ['Current Y',     fmtNum(tel.data_current_y, 3) + ' A'],
-    ['Current B',     fmtNum(tel.data_current_b, 3) + ' A'],
-    ['Frequency',     fmtNum(tel.data_frequency, 2) + ' Hz']
-  ])}
+      ['Voltage R-N', fmtNum(tel.data_voltage_r_n, 2) + ' V'],
+      ['Voltage Y-N', fmtNum(tel.data_voltage_y_n, 2) + ' V'],
+      ['Voltage B-N', fmtNum(tel.data_voltage_b_n, 2) + ' V'],
+      ['Voltage R-Y', fmtNum(tel.data_voltage_r_y, 2) + ' V'],
+      ['Voltage Y-B', fmtNum(tel.data_voltage_y_b, 2) + ' V'],
+      ['Voltage B-R', fmtNum(tel.data_voltage_b_r, 2) + ' V'],
+      ['Current R', fmtNum(tel.data_current_r, 3) + ' A'],
+      ['Current Y', fmtNum(tel.data_current_y, 3) + ' A'],
+      ['Current B', fmtNum(tel.data_current_b, 3) + ' A'],
+      ['Frequency', fmtNum(tel.data_frequency, 2) + ' Hz']
+    ])}
   ${TelemetrySection('🔋 Power & Energy', [
-    ['Active Power',    `<strong class="highlight">${fmtNum(tel.data_kw, 3)} kW</strong>`],
-    ['Apparent Power',  fmtNum(tel.data_kva, 3) + ' kVA'],
-    ['Energy (kWh)',    fmtNum(tel.data_kwh, 3)],
-    ['Energy (kVAh)',   fmtNum(tel.data_kvah, 3)],
-    ['Reactive Energy', fmtNum(tel.data_kvarh, 3)],
-    ['Power Factor',    `<span style="color:${getPFColor(tel.data_pf)};font-weight:700">${fmtNum(Math.abs(tel.data_pf), 4)}</span>`],
-    ['PF Phase R',      fmtNum(Math.abs(tel.data_pf_r), 3)],
-    ['PF Phase Y',      fmtNum(Math.abs(tel.data_pf_y), 3)],
-    ['PF Phase B',      fmtNum(Math.abs(tel.data_pf_b), 3)]
-  ])}
+      ['Active Power', `<strong class="highlight">${fmtNum(tel.data_kw, 3)} kW</strong>`],
+      ['Apparent Power', fmtNum(tel.data_kva, 3) + ' kVA'],
+      ['Energy (kWh)', fmtNum(tel.data_kwh, 3)],
+      ['Energy (kVAh)', fmtNum(tel.data_kvah, 3)],
+      ['Reactive Energy', fmtNum(tel.data_kvarh, 3)],
+      ['Power Factor', `<span style="color:${getPFColor(tel.data_pf)};font-weight:700">${fmtNum(Math.abs(tel.data_pf), 4)}</span>`],
+      ['PF Phase R', fmtNum(Math.abs(tel.data_pf_r), 3)],
+      ['PF Phase Y', fmtNum(Math.abs(tel.data_pf_y), 3)],
+      ['PF Phase B', fmtNum(Math.abs(tel.data_pf_b), 3)]
+    ])}
   ${TelemetrySection('🕹️ Operation', [
-    ['Run Time',        fmtNum(tel.running_time_min, 1) + ' min'],
-    ['Start/Stop Count', tel.start_stop_count || 0],
-    ['Total Run Hours', fmtNum(Math.abs(tel.total_running_hours), 2) + ' h']
-  ])}
+      ['Run Time', fmtNum(tel.running_time_min, 1) + ' min'],
+      ['Start/Stop Count', tel.start_stop_count || 0],
+      ['Total Run Hours', fmtNum(Math.abs(tel.total_running_hours), 2) + ' h']
+    ])}
 </div>`;
   } else {
     // Flow meter: 1 telemetry section
@@ -676,14 +671,14 @@ function ModalContent(device) {
 <h3 class="section-title">📡 Latest Telemetry</h3>
 <div class="telemetry-grid">
   ${TelemetrySection('💧 Flow Measurements', [
-    ['Flow Rate',       `<strong class="highlight">${fmtNum(tel.data_flow_rate || tel.flow_rate, 3)} m³/h</strong>`],
-    ['Total Flow',      fmtNum(tel.data_flow_total || tel.flow_total, 3) + ' m³'],
-    ['Flow Unit',       tel.data_flow_unit ?? '—'],
-    ['Decimal Point',   tel.data_flow_decimal_point ?? '—'],
-    ['Kilo Flag',       tel.data_flow_kilo_flag || 0],
-    ['Empty Pipe',      tel.data_flow_empty_pipe  ? '⚠️ Yes' : 'No'],
-    ['Over Range',      tel.data_flow_over_range  ? '⚠️ Yes' : 'No']
-  ])}
+      ['Flow Rate', `<strong class="highlight">${fmtNum(tel.data_flow_rate || tel.flow_rate, 3)} m³/h</strong>`],
+      ['Total Flow', fmtNum(tel.data_flow_total || tel.flow_total, 3) + ' m³'],
+      ['Flow Unit', tel.data_flow_unit ?? '—'],
+      ['Decimal Point', tel.data_flow_decimal_point ?? '—'],
+      ['Kilo Flag', tel.data_flow_kilo_flag || 0],
+      ['Empty Pipe', tel.data_flow_empty_pipe ? '⚠️ Yes' : 'No'],
+      ['Over Range', tel.data_flow_over_range ? '⚠️ Yes' : 'No']
+    ])}
 </div>`;
   }
 
@@ -705,7 +700,7 @@ function ToastNotification(message, type = 'info', duration = 3500) {
   document.getElementById('iot-toast')?.remove();
 
   const toast = document.createElement('div');
-  toast.id        = 'iot-toast';
+  toast.id = 'iot-toast';
   toast.className = `iot-toast toast-${type}`;
   toast.setAttribute('role', 'status');
   toast.setAttribute('aria-live', 'polite');
@@ -743,7 +738,7 @@ function getChartColors() {
   return {
     grid: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.07)',
     tick: dark ? '#8892a4' : '#64748b',
-    leg:  dark ? '#c0ccd8' : '#334155'
+    leg: dark ? '#c0ccd8' : '#334155'
   };
 }
 
@@ -825,9 +820,9 @@ function initTelChart() {
       responsive: true,
       maintainAspectRatio: false,
       scales: {
-        y:  { type: 'linear', position: 'left',  grid: { color: c.grid }, ticks: { color: '#00d4aa', font: { size: 10 } } },
+        y: { type: 'linear', position: 'left', grid: { color: c.grid }, ticks: { color: '#00d4aa', font: { size: 10 } } },
         y1: { type: 'linear', position: 'right', grid: { drawOnChartArea: false }, ticks: { color: '#7461ef', font: { size: 10 } } },
-        x:  { grid: { display: false }, ticks: { color: c.tick, font: { size: 9 }, maxRotation: 35 } }
+        x: { grid: { display: false }, ticks: { color: c.tick, font: { size: 9 }, maxRotation: 35 } }
       },
       plugins: { legend: { labels: { color: c.leg, font: { size: 11 }, boxWidth: 12 } } }
     }
@@ -842,7 +837,7 @@ function initTelChart() {
 function initFlowChart() {
   const ctx = document.getElementById('flowChart');
   if (!ctx) return;
-  const c   = getChartColors();
+  const c = getChartColors();
   const fds = DEVICES_DATA.filter(d => d.type === 'Flow-Meter' && Object.keys(d.telemetry).length > 0);
   if (flowChart) flowChart.destroy();
   flowChart = new Chart(ctx, {
@@ -888,18 +883,18 @@ function initFlowChart() {
  * @used-in  App init, refreshData() after successful API fetch
  */
 function renderStats() {
-  const s  = getStats();
+  const s = getStats();
   const se = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-  se('stat-total',   s.total);
-  se('stat-online',  s.online);
+  se('stat-total', s.total);
+  se('stat-online', s.online);
   se('stat-offline', s.offline);
-  se('stat-pumps',   s.pumps);
-  se('stat-flow',    s.flowMeters);
+  se('stat-pumps', s.pumps);
+  se('stat-flow', s.flowMeters);
   se('stat-running', s.running);
   se('stat-standby', s.standby);
   se('stat-no-data', s.noData);
-  se('stat-kw',      s.totalKW.toFixed(1) + ' kW');
-  se('stat-kwh',     (s.totalKWH / 1000).toFixed(1) + ' MWh');
+  se('stat-kw', s.totalKW.toFixed(1) + ' kW');
+  se('stat-kwh', (s.totalKWH / 1000).toFixed(1) + ' MWh');
   initDonut(s.running, s.standby, s.offline, s.noData);
 }
 
@@ -910,10 +905,10 @@ function renderStats() {
  * @used-in  App init, filter changes, search input, sort changes, refreshData()
  */
 function renderDevices() {
-  const devs  = getFilteredDevices();
-  const grid  = document.getElementById('device-grid');
+  const devs = getFilteredDevices();
+  const grid = document.getElementById('device-grid');
   const empty = document.getElementById('empty-state');
-  const cnt   = document.getElementById('result-count');
+  const cnt = document.getElementById('result-count');
 
   if (cnt) cnt.textContent = devs.length + ' device' + (devs.length !== 1 ? 's' : '');
 
@@ -922,49 +917,25 @@ function renderDevices() {
   hideMapView();
 
   if (!devs.length) {
-    grid.style.display  = 'none';
+    grid.style.display = 'none';
     empty.style.display = 'flex';
     return;
   }
 
   empty.style.display = 'none';
+  grid.className = state.view === 'grid' ? 'device-grid' : 'device-list';
+  grid.style.display = state.view === 'grid' ? 'grid' : 'flex';
 
-  if (state.view === 'grouped') {
-    grid.className = 'device-grouped';
-    grid.style.display = 'block';
-
-    const groups = {};
-    devs.forEach(d => {
-      if (!groups[d.location]) groups[d.location] = [];
-      groups[d.location].push(d);
-    });
-
-    const sortedLocations = Object.keys(groups).sort();
-    grid.innerHTML = sortedLocations.map(loc => `
-      <div class="location-group">
-        <div class="location-group-header">
-          <h3>${loc}</h3>
-          <span class="location-group-count">${groups[loc].length} Devices</span>
-        </div>
-        <div class="device-grid">
-          ${groups[loc].map(DeviceCard).join('')}
-        </div>
-      </div>
-    `).join('');
-  } else {
-    grid.className      = state.view === 'grid' ? 'device-grid' : 'device-list';
-    grid.style.display  = state.view === 'grid' ? 'grid'        : 'flex';
-    // Build HTML using DeviceCard() component
-    grid.innerHTML = devs.map(DeviceCard).join('');
-  }
+  // Build HTML using DeviceCard() component
+  grid.innerHTML = devs.map(DeviceCard).join('');
 
   // Attach card interactions
   grid.querySelectorAll('.device-card').forEach((el, i) => {
     el.style.animationDelay = (i * 25) + 'ms';
     el.classList.add('card-enter');
     const device = DEVICES_DATA.find(d => d.id === el.dataset.id);
-    el.addEventListener('click',   () => openModal(device));
-    el.addEventListener('keydown', e  => { if (e.key === 'Enter') openModal(device); });
+    el.addEventListener('click', () => openModal(device));
+    el.addEventListener('keydown', e => { if (e.key === 'Enter') openModal(device); });
   });
 }
 
@@ -986,7 +957,7 @@ function renderLastUpdated() {
  */
 function openModal(device) {
   if (!device) return;
-  const modal   = document.getElementById('device-modal');
+  const modal = document.getElementById('device-modal');
   const content = document.getElementById('modal-content');
   content.innerHTML = ModalContent(device);
   modal.classList.add('open');
@@ -1051,7 +1022,7 @@ function populateFilters() {
   while (sel.options.length > 1) sel.remove(1);
   getLocations().forEach(loc => {
     const o = document.createElement('option');
-    o.value       = loc;
+    o.value = loc;
     o.textContent = locIcon(loc) + ' ' + loc;
     sel.appendChild(o);
   });
@@ -1176,15 +1147,15 @@ async function apiGetTelemetry(deviceId, token) {
 function mergeApiData(apiDevices, telemetryMap) {
   // FIX: telemetryMap now holds { telemetry, active, lastActivityTime } objects
   apiDevices.forEach(apiDev => {
-    const id      = apiDev.id?.id;
-    const tData   = telemetryMap.get(id) || { telemetry: {}, active: null, lastActivityTime: null };
-    const idx     = DEVICES_DATA.findIndex(d => d.id === id);
-    const seed    = idx >= 0 ? DEVICES_DATA[idx] : {};
+    const id = apiDev.id?.id;
+    const tData = telemetryMap.get(id) || { telemetry: {}, active: null, lastActivityTime: null };
+    const idx = DEVICES_DATA.findIndex(d => d.id === id);
+    const seed = idx >= 0 ? DEVICES_DATA[idx] : {};
 
     // FIX: apiDev.type is "Pump-AVH 14-M1-E3-N1" or "Flow-Meter-xxx"
     //      – check start of string, not includes('Flow')
     const rawType = (apiDev.type || '').toLowerCase();
-    const type    = rawType.startsWith('flow') ? 'Flow-Meter' : 'Pump';
+    const type = rawType.startsWith('flow') ? 'Flow-Meter' : 'Pump';
 
     // FIX: active comes from attributes (tData.active), not apiDev.active (always undefined)
     //      Fall back to seed data active value if attributes call also failed (null)
@@ -1202,13 +1173,13 @@ function mergeApiData(apiDevices, telemetryMap) {
       // "AdityNager-PUMP-1" → "Adityanagar", "Varun-Pumping-FLOW-1" → "Varun Pumping"
       const nm = apiDev.name || '';
       const nameMap = {
-        'anandpur'  : 'Anandpur',    'padariya'   : 'Padariya',
-        'sardarbag' : 'Sardarbag',   'gopalwadi'  : 'Gopalwadi',
-        'timbavadi' : 'Timbavadi',   'saragvada'  : 'Saragvada',
-        'aditynager': 'Adityanagar', 'aditynanag' : 'Adityanagar',
-        'varun'     : 'Varun Pumping','dharmaveda' : 'Dharmaveda',
-        'dharamaved': 'Dharamaveda', 'khamdhrol'  : 'Khamdhrol',
-        'dolatpara' : 'Dolatpara',
+        'anandpur': 'Anandpur', 'padariya': 'Padariya',
+        'sardarbag': 'Sardarbag', 'gopalwadi': 'Gopalwadi',
+        'timbavadi': 'Timbavadi', 'saragvada': 'Saragvada',
+        'aditynager': 'Adityanagar', 'aditynanag': 'Adityanagar',
+        'varun': 'Varun Pumping', 'dharmaveda': 'Dharmaveda',
+        'dharamaved': 'Dharamaveda', 'khamdhrol': 'Khamdhrol',
+        'dolatpara': 'Dolatpara',
       };
       const nmLow = nm.toLowerCase();
       location = Object.entries(nameMap).find(([k]) => nmLow.startsWith(k))?.[1] || 'Unknown';
@@ -1216,13 +1187,13 @@ function mergeApiData(apiDevices, telemetryMap) {
 
     const merged = {
       id,
-      name            : apiDev.name,
+      name: apiDev.name,
       type,
       location,
       active,
       lastActivityTime,
-      createdTime     : apiDev.createdTime ?? seed.createdTime ?? null,
-      telemetry       : tData.telemetry
+      createdTime: apiDev.createdTime ?? seed.createdTime ?? null,
+      telemetry: tData.telemetry
     };
 
     if (idx >= 0) {
@@ -1292,7 +1263,7 @@ async function refreshData() {
 
     // Step 3: Fetch telemetry for each device (parallel, max 5 concurrent)
     const telemetryMap = new Map();
-    const batchSize    = 5;
+    const batchSize = 5;
     for (let i = 0; i < apiDevices.length; i += batchSize) {
       const batch = apiDevices.slice(i, i + batchSize);
       const results = await Promise.all(
@@ -1537,18 +1508,18 @@ document.addEventListener('DOMContentLoaded', () => {
 // ── Alert config: severity + icon + message template per state transition ──
 const ALERT_RULES = {
   // key: "oldState→newState"
-  'standby→running'  : { sev:'info',     icon:'⚡', msg: n => `${n} started running`           },
-  'offline→running'  : { sev:'info',     icon:'⚡', msg: n => `${n} back online and running`    },
-  'no-data→running'  : { sev:'info',     icon:'⚡', msg: n => `${n} now running (data appeared)` },
-  'running→standby'  : { sev:'warning',  icon:'✅', msg: n => `${n} pump stopped – now standby` },
-  'offline→standby'  : { sev:'info',     icon:'✅', msg: n => `${n} is back online`             },
-  'no-data→standby'  : { sev:'info',     icon:'🔌', msg: n => `${n} started sending data`       },
-  'running→offline'  : { sev:'critical', icon:'📴', msg: n => `${n} WENT OFFLINE while running!` },
-  'standby→offline'  : { sev:'critical', icon:'📴', msg: n => `${n} went offline`               },
-  'no-data→offline'  : { sev:'warning',  icon:'📴', msg: n => `${n} disconnected`               },
-  'running→no-data'  : { sev:'critical', icon:'⚠️', msg: n => `${n} lost telemetry while running` },
-  'standby→no-data'  : { sev:'warning',  icon:'⚠️', msg: n => `${n} stopped sending data`       },
-  'offline→no-data'  : { sev:'warning',  icon:'⚠️', msg: n => `${n} data cleared`               },
+  'standby→running': { sev: 'info', icon: '⚡', msg: n => `${n} started running` },
+  'offline→running': { sev: 'info', icon: '⚡', msg: n => `${n} back online and running` },
+  'no-data→running': { sev: 'info', icon: '⚡', msg: n => `${n} now running (data appeared)` },
+  'running→standby': { sev: 'warning', icon: '✅', msg: n => `${n} pump stopped – now standby` },
+  'offline→standby': { sev: 'info', icon: '✅', msg: n => `${n} is back online` },
+  'no-data→standby': { sev: 'info', icon: '🔌', msg: n => `${n} started sending data` },
+  'running→offline': { sev: 'critical', icon: '📴', msg: n => `${n} WENT OFFLINE while running!` },
+  'standby→offline': { sev: 'critical', icon: '📴', msg: n => `${n} went offline` },
+  'no-data→offline': { sev: 'warning', icon: '📴', msg: n => `${n} disconnected` },
+  'running→no-data': { sev: 'critical', icon: '⚠️', msg: n => `${n} lost telemetry while running` },
+  'standby→no-data': { sev: 'warning', icon: '⚠️', msg: n => `${n} stopped sending data` },
+  'offline→no-data': { sev: 'warning', icon: '⚠️', msg: n => `${n} data cleared` },
 };
 
 /** @private Max alerts to keep in history */
@@ -1634,17 +1605,17 @@ function addAlert(device, oldState, newState) {
   if (!rule) return;
 
   const alert = {
-    id       : Date.now() + Math.random(),
-    deviceId : device.id,
+    id: Date.now() + Math.random(),
+    deviceId: device.id,
     deviceName: device.name,
-    location : device.location,
-    type     : device.type,
+    location: device.location,
+    type: device.type,
     oldState,
     newState,
-    sev      : rule.sev,
-    icon     : rule.icon,
-    message  : rule.msg(device.name),
-    ts       : Date.now()
+    sev: rule.sev,
+    icon: rule.icon,
+    message: rule.msg(device.name),
+    ts: Date.now()
   };
 
   alertHistory.unshift(alert);
@@ -1694,11 +1665,11 @@ function renderAlertPanel() {
 
   const timeAgo = ts => {
     const m = Math.floor((Date.now() - ts) / 60000);
-    if (m < 1)  return 'just now';
+    if (m < 1) return 'just now';
     if (m < 60) return m + 'm ago';
     const h = Math.floor(m / 60);
     if (h < 24) return h + 'h ago';
-    return new Date(ts).toLocaleDateString('en-IN', { day:'2-digit', month:'short' });
+    return new Date(ts).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
   };
 
   list.innerHTML = alertHistory.map(a => `
@@ -1802,18 +1773,18 @@ function detectStateChanges(oldSnap) {
  *              Key must match device.location values in DEVICES_DATA exactly.
  */
 const LOCATION_COORDS = {
-  'Anandpur'     : { lat: 21.400861, lng: 70.525267, label: 'Anandpur Dam'          },
-  'Padariya'     : { lat: 21.470936, lng: 70.472886, label: 'Padariya Filter Plant' },
-  'Sardarbag'    : { lat: 21.520165, lng: 70.448609, label: 'Sardarbag'             },
-  'Gopalwadi'    : { lat: 21.526732, lng: 70.430344, label: 'Gopalwadi'             },
-  'Timbavadi'    : { lat: 21.504558, lng: 70.433469, label: 'Timbavadi'             },
-  'Saragvada'    : { lat: 21.534045, lng: 70.448781, label: 'Saragvada'             },
-  'Adityanagar'  : { lat: 21.539650, lng: 70.451628, label: 'Adityanagar'           },
+  'Anandpur': { lat: 21.400861, lng: 70.525267, label: 'Anandpur Dam' },
+  'Padariya': { lat: 21.470936, lng: 70.472886, label: 'Padariya Filter Plant' },
+  'Sardarbag': { lat: 21.520165, lng: 70.448609, label: 'Sardarbag' },
+  'Gopalwadi': { lat: 21.526732, lng: 70.430344, label: 'Gopalwadi' },
+  'Timbavadi': { lat: 21.504558, lng: 70.433469, label: 'Timbavadi' },
+  'Saragvada': { lat: 21.534045, lng: 70.448781, label: 'Saragvada' },
+  'Adityanagar': { lat: 21.539650, lng: 70.451628, label: 'Adityanagar' },
   'Varun Pumping': { lat: 21.520821, lng: 70.458138, label: 'Varun Pumping Station' },
-  'Dharmaveda'   : { lat: 21.499883, lng: 70.457179, label: 'Dharmaveda'            },
-  'Dharamaveda'  : { lat: 21.499883, lng: 70.457179, label: 'Dharamaveda'           },
-  'Khamdhrol'    : { lat: 21.550980, lng: 70.453419, label: 'Khamdhrol'             },
-  'Dolatpara'    : { lat: 21.551478, lng: 70.470424, label: 'Dolatpara'             },
+  'Dharmaveda': { lat: 21.499883, lng: 70.457179, label: 'Dharmaveda' },
+  'Dharamaveda': { lat: 21.499883, lng: 70.457179, label: 'Dharamaveda' },
+  'Khamdhrol': { lat: 21.550980, lng: 70.453419, label: 'Khamdhrol' },
+  'Dolatpara': { lat: 21.551478, lng: 70.470424, label: 'Dolatpara' },
 };
 
 /** @private Leaflet map instance */
@@ -1833,9 +1804,9 @@ function getLocationWorstState(location) {
   const devs = DEVICES_DATA.filter(d => d.location === location);
   if (!devs.length) return 'no-data';
   const states = devs.map(d => getDeviceState(d));
-  if (states.includes('offline'))  return 'offline';
-  if (states.includes('running'))  return 'running';
-  if (states.includes('no-data'))  return 'no-data';
+  if (states.includes('offline')) return 'offline';
+  if (states.includes('running')) return 'running';
+  if (states.includes('no-data')) return 'no-data';
   return 'standby';
 }
 
@@ -1850,16 +1821,16 @@ function getLocationWorstState(location) {
  */
 function buildMarkerIcon(worstState, count, label) {
   // Normalise state key to CSS class: 'no-data' -> 'nodata' (hyphen removed)
-  const cls = 'mm-' + worstState.replace('-','');
+  const cls = 'mm-' + worstState.replace('-', '');
   return L.divIcon({
     className: 'custom-marker',
     html: `<div class="map-marker">
       <div class="map-marker-circle ${cls}">${count}</div>
       <div class="map-marker-label">${label}</div>
     </div>`,
-    iconSize:   [60, 52],
+    iconSize: [60, 52],
     iconAnchor: [30, 52],
-    popupAnchor:[0, -54]
+    popupAnchor: [0, -54]
   });
 }
 
@@ -1883,7 +1854,7 @@ function buildPopupHTML(location, devices) {
       <span class="map-popup-badge ${ds}">${STATE_LABEL[ds]}</span>
     </div>`;
   }).join('');
-  return `<div class="map-popup-header">${locIcon(location)} ${location} <span style="color:var(--text3);font-weight:400;font-size:11px">(${devices.length} device${devices.length!==1?'s':''})</span></div>
+  return `<div class="map-popup-header">${locIcon(location)} ${location} <span style="color:var(--text3);font-weight:400;font-size:11px">(${devices.length} device${devices.length !== 1 ? 's' : ''})</span></div>
 <div class="map-popup-devices">${rows}</div>`;
 }
 
@@ -1898,15 +1869,15 @@ function initMap() {
   if (typeof L === 'undefined') { console.error('[JUMC Map] Leaflet not loaded'); return; }
 
   leafletMap = L.map('iot-map', {
-    center    : [21.480000, 70.467000], // Centred between Junagadh city and Anandpur Dam
-    zoom      : 12,
+    center: [21.480000, 70.467000], // Centred between Junagadh city and Anandpur Dam
+    zoom: 12,
     zoomControl: true,
     attributionControl: true
   });
 
   // OpenStreetMap tile layer (free, no API key)
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom    : 19,
+    maxZoom: 19,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
   }).addTo(leafletMap);
 }
@@ -1937,8 +1908,8 @@ function renderMap() {
     if (!coords) return; // no coordinates for this location yet
 
     const worstState = getLocationWorstState(loc);
-    const icon       = buildMarkerIcon(worstState, devs.length, coords.label);
-    const marker     = L.marker([coords.lat, coords.lng], { icon }).addTo(leafletMap);
+    const icon = buildMarkerIcon(worstState, devs.length, coords.label);
+    const marker = L.marker([coords.lat, coords.lng], { icon }).addTo(leafletMap);
 
     const popup = L.popup({ maxWidth: 280, minWidth: 220 })
       .setContent(buildPopupHTML(loc, devs));
@@ -2007,9 +1978,9 @@ function getAnomalies() {
     if (state === 'offline' || state === 'no-data') return true;
     if (d.type === 'Pump' && Object.keys(d.telemetry).length > 0) {
       const pf = Math.abs(parseFloat(d.telemetry.data_pf) || 1);
-      const v  = parseFloat(d.telemetry.data_voltage_r_n) || 230;
+      const v = parseFloat(d.telemetry.data_voltage_r_n) || 230;
       const hz = parseFloat(d.telemetry.data_frequency) || 50;
-      if (pf > 0 && pf < 0.85)          return true;  // Low power factor
+      if (pf > 0 && pf < 0.85) return true;  // Low power factor
       if ((v > 10) && (v < 210 || v > 270)) return true;  // Voltage out of range
       if ((hz > 0) && (hz < 48 || hz > 52)) return true;  // Frequency deviation
     }
@@ -2027,15 +1998,15 @@ function getAnomalies() {
 function getAnomalyReasons(d) {
   const state = getDeviceState(d);
   const reasons = [];
-  if (state === 'offline')  reasons.push('Offline');
-  if (state === 'no-data')  reasons.push('Not Configured');
+  if (state === 'offline') reasons.push('Offline');
+  if (state === 'no-data') reasons.push('Not Configured');
   if (d.type === 'Pump' && Object.keys(d.telemetry).length > 0) {
     const pf = Math.abs(parseFloat(d.telemetry.data_pf) || 1);
-    const v  = parseFloat(d.telemetry.data_voltage_r_n) || 0;
+    const v = parseFloat(d.telemetry.data_voltage_r_n) || 0;
     const hz = parseFloat(d.telemetry.data_frequency) || 0;
-    if (pf > 0 && pf < 0.85)             reasons.push(`Low P.F.: ${fmtNum(pf,3)}`);
-    if (v > 10 && (v < 210 || v > 270))  reasons.push(`V R-N: ${fmtNum(v,1)}V`);
-    if (hz > 0 && (hz < 48 || hz > 52))  reasons.push(`Freq: ${fmtNum(hz,2)}Hz`);
+    if (pf > 0 && pf < 0.85) reasons.push(`Low P.F.: ${fmtNum(pf, 3)}`);
+    if (v > 10 && (v < 210 || v > 270)) reasons.push(`V R-N: ${fmtNum(v, 1)}V`);
+    if (hz > 0 && (hz < 48 || hz > 52)) reasons.push(`Freq: ${fmtNum(hz, 2)}Hz`);
   }
   return reasons.join(' · ') || '—';
 }
@@ -2047,11 +2018,11 @@ function getAnomalyReasons(d) {
  * @used-in  printReport()
  */
 function generateReport() {
-  const s   = getStats();
+  const s = getStats();
   const now = new Date();
   const dateStr = now.toLocaleString('en-IN', {
-    weekday:'long', year:'numeric', month:'long', day:'numeric',
-    hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
   });
   const anomalies = getAnomalies();
 
@@ -2071,7 +2042,7 @@ function generateReport() {
     <td class="pr-red">${s.offline}</td>
     <td class="pr-amber">${s.noData}</td>
     <td>${s.totalKW.toFixed(1)}</td>
-    <td>${(s.totalKWH/1000).toFixed(2)}</td>
+    <td>${(s.totalKWH / 1000).toFixed(2)}</td>
   </tr>
 </table>`;
 
@@ -2082,28 +2053,28 @@ function generateReport() {
   <td>${d.location}</td>
   <td>${d.type}</td>
   <td class="pr-red">${getAnomalyReasons(d)}</td>
-  <td>${fmtNum(Math.abs(parseFloat(d.telemetry.data_kw)||0),2)||'—'}</td>
+  <td>${fmtNum(Math.abs(parseFloat(d.telemetry.data_kw) || 0), 2) || '—'}</td>
   <td>${timeSince(d.lastActivityTime)}</td>
 </tr>`).join('');
 
   /* Device state helpers */
-  const stCls = s => s==='running'?'pr-purple':s==='standby'?'pr-green':s==='offline'?'pr-red':s==='no-data'?'pr-amber':'';
+  const stCls = s => s === 'running' ? 'pr-purple' : s === 'standby' ? 'pr-green' : s === 'offline' ? 'pr-red' : s === 'no-data' ? 'pr-amber' : '';
 
   /* All-device rows */
   const deviceRows = [...DEVICES_DATA]
-    .sort((a,b) => a.location.localeCompare(b.location) || a.name.localeCompare(b.name))
-    .map((d,i) => {
-      const st  = getDeviceState(d);
+    .sort((a, b) => a.location.localeCompare(b.location) || a.name.localeCompare(b.name))
+    .map((d, i) => {
+      const st = getDeviceState(d);
       const tel = d.telemetry;
-      const kw  = d.type==='Pump' ? fmtNum(Math.abs(parseFloat(tel.data_kw)||0),2) : '—';
-      const pf  = d.type==='Pump' ? fmtNum(Math.abs(parseFloat(tel.data_pf)||0),3) : '—';
-      const vRN = d.type==='Pump' ? fmtNum(parseFloat(tel.data_voltage_r_n)||0,1)  : '—';
-      const fr  = d.type==='Flow-Meter' ? fmtNum(parseFloat(tel.data_flow_rate||tel.flow_rate)||0,3)+' m³/h' : '—';
+      const kw = d.type === 'Pump' ? fmtNum(Math.abs(parseFloat(tel.data_kw) || 0), 2) : '—';
+      const pf = d.type === 'Pump' ? fmtNum(Math.abs(parseFloat(tel.data_pf) || 0), 3) : '—';
+      const vRN = d.type === 'Pump' ? fmtNum(parseFloat(tel.data_voltage_r_n) || 0, 1) : '—';
+      const fr = d.type === 'Flow-Meter' ? fmtNum(parseFloat(tel.data_flow_rate || tel.flow_rate) || 0, 3) + ' m³/h' : '—';
       return `<tr>
-  <td>${i+1}</td>
+  <td>${i + 1}</td>
   <td>${d.name}</td>
   <td>${d.location}</td>
-  <td>${d.type==='Pump'?'Pump':'Flow'}</td>
+  <td>${d.type === 'Pump' ? 'Pump' : 'Flow'}</td>
   <td class="${stCls(st)}">${STATE_LABEL[st]}</td>
   <td>${kw}</td><td>${pf}</td><td>${vRN}</td><td>${fr}</td>
   <td>${timeSince(d.lastActivityTime)}</td>
@@ -2124,15 +2095,15 @@ function generateReport() {
   <h2 class="pr-section-title">Summary</h2>
   ${summaryHTML}
 
-  <h2 class="pr-section-title${anomalies.length?' pr-red-title':''}">
-    ${anomalies.length ? `⚠️ Anomalies — ${anomalies.length} device${anomalies.length!==1?'s':''} need attention` : '✅ No Anomalies'}
+  <h2 class="pr-section-title${anomalies.length ? ' pr-red-title' : ''}">
+    ${anomalies.length ? `⚠️ Anomalies — ${anomalies.length} device${anomalies.length !== 1 ? 's' : ''} need attention` : '✅ No Anomalies'}
   </h2>
   ${anomalies.length
-    ? `<table class="pr-table">
+      ? `<table class="pr-table">
         <thead><tr><th>Device</th><th>Location</th><th>Type</th><th>Issues</th><th>kW</th><th>Last Seen</th></tr></thead>
         <tbody>${anomalyRows}</tbody>
        </table>`
-    : '<p class="pr-good">All devices are operating normally at the time of this report.</p>'}
+      : '<p class="pr-good">All devices are operating normally at the time of this report.</p>'}
 
   <h2 class="pr-section-title">All Devices (${DEVICES_DATA.length}) — sorted by location</h2>
   <table class="pr-table">
@@ -2188,7 +2159,7 @@ function loadStoredCredentials() {
     if (!raw) return false;
     const data = JSON.parse(atob(raw));
     if (data.username) { CONFIG.username = data.username; CONFIG.password = data.password || ''; }
-    if (data.apiBase)    CONFIG.apiBase  = data.apiBase;
+    if (data.apiBase) CONFIG.apiBase = data.apiBase;
     return !!CONFIG.username;
   } catch { return false; }
 }
@@ -2204,9 +2175,9 @@ function loadStoredCredentials() {
 function saveCredentials(apiBase, username, password) {
   const data = { apiBase, username, password };
   localStorage.setItem(CRED_KEY, btoa(JSON.stringify(data)));
-  CONFIG.apiBase   = apiBase;
-  CONFIG.username  = username;
-  CONFIG.password  = password;
+  CONFIG.apiBase = apiBase;
+  CONFIG.username = username;
+  CONFIG.password = password;
 }
 
 /**
@@ -2225,18 +2196,18 @@ function clearCredentials() {
  * @used-in  App init (no credentials), setup form submit
  */
 function showSetupModal() {
-  const modal   = document.getElementById('setup-modal');
+  const modal = document.getElementById('setup-modal');
   const overlay = document.getElementById('setup-overlay');
   if (!modal || !overlay) return;
-  modal.style.display   = 'block';
+  modal.style.display = 'block';
   overlay.style.display = 'block';
   document.body.style.overflow = 'hidden';
-  modal.querySelector('#setup-url').value  = CONFIG.apiBase;
+  modal.querySelector('#setup-url').value = CONFIG.apiBase;
   modal.querySelector('#setup-user').focus();
 }
 function hideSetupModal() {
-  document.getElementById('setup-modal')?.style.setProperty('display','none');
-  document.getElementById('setup-overlay')?.style.setProperty('display','none');
+  document.getElementById('setup-modal')?.style.setProperty('display', 'none');
+  document.getElementById('setup-overlay')?.style.setProperty('display', 'none');
   document.body.style.overflow = '';
 }
 
@@ -2249,22 +2220,22 @@ function hideSetupModal() {
  */
 async function handleSetupSubmit(e) {
   e.preventDefault();
-  const url  = document.getElementById('setup-url').value.trim().replace(/\/$/, '');
+  const url = document.getElementById('setup-url').value.trim().replace(/\/$/, '');
   const user = document.getElementById('setup-user').value.trim();
   const pass = document.getElementById('setup-pass').value;
-  const btn  = document.getElementById('setup-submit');
+  const btn = document.getElementById('setup-submit');
   const errEl = document.getElementById('setup-error');
 
   if (errEl) errEl.remove();
-  btn.disabled    = true;
+  btn.disabled = true;
   btn.textContent = 'Connecting…';
 
   try {
     // Test credentials before saving
     const res = await fetch(`${url}/api/auth/login`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ username:user, password:pass })
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: user, password: pass })
     });
     if (!res.ok) throw new Error(`Login failed (HTTP ${res.status}) — check credentials`);
     await res.json(); // must succeed
@@ -2277,12 +2248,12 @@ async function handleSetupSubmit(e) {
     ToastNotification('✅ Connected to ThingsBoard. Loading devices…', 'success', 4000);
   } catch (err) {
     const errDiv = document.createElement('p');
-    errDiv.id        = 'setup-error';
+    errDiv.id = 'setup-error';
     errDiv.className = 'setup-error';
     errDiv.textContent = '❌ ' + err.message;
     document.getElementById('setup-form').appendChild(errDiv);
   } finally {
-    btn.disabled    = false;
+    btn.disabled = false;
     btn.textContent = 'Connect Dashboard';
   }
 }
@@ -2297,16 +2268,16 @@ async function handleSetupSubmit(e) {
 
 /** @private WebSocket state */
 const WS = {
-  socket       : null,    // Active WebSocket instance
+  socket: null,    // Active WebSocket instance
   reconnectTimer: null,   // setTimeout handle for reconnect
-  failCount    : 0,       // Consecutive connection failures
-  maxFails     : 3,       // After this many fails, fall back to polling
-  delay        : 5000,    // Current reconnect delay (ms)
-  maxDelay     : 60000,   // Max reconnect delay
-  subMap       : new Map(), // cmdId → deviceId
-  devMap       : new Map(), // deviceId → DEVICES_DATA index
-  isLive       : false,   // true when WS is healthy
-  token        : null,    // Current JWT
+  failCount: 0,       // Consecutive connection failures
+  maxFails: 3,       // After this many fails, fall back to polling
+  delay: 5000,    // Current reconnect delay (ms)
+  maxDelay: 60000,   // Max reconnect delay
+  subMap: new Map(), // cmdId → deviceId
+  devMap: new Map(), // deviceId → DEVICES_DATA index
+  isLive: false,   // true when WS is healthy
+  token: null,    // Current JWT
   renderDebounce: null,   // debounce timer for UI re-render
 };
 
@@ -2320,12 +2291,12 @@ function setWsStatus(status) {
   const el = document.getElementById('ws-status');
   if (!el) return;
   const labels = {
-    live      : ['🟢', 'Live', 'ws-live'],
-    reconnect : ['🟡', 'Reconnecting…', 'ws-reconnect'],
-    polling   : ['🟠', 'Polling (10 min)', 'ws-polling']
+    live: ['🟢', 'Live', 'ws-live'],
+    reconnect: ['🟡', 'Reconnecting…', 'ws-reconnect'],
+    polling: ['🟠', 'Polling (10 min)', 'ws-polling']
   };
   const [icon, text, cls] = labels[status] || labels.polling;
-  el.className   = `ws-status-badge ${cls}`;
+  el.className = `ws-status-badge ${cls}`;
   el.textContent = `${icon} ${text}`;
 }
 
@@ -2339,15 +2310,15 @@ function setWsStatus(status) {
 function buildWsSubscription() {
   WS.subMap.clear();
   WS.devMap.clear();
-  const tsSubCmds   = [];
+  const tsSubCmds = [];
   const attrSubCmds = [];
   const N = DEVICES_DATA.length;
 
   DEVICES_DATA.forEach((d, i) => {
-    const telCmdId  = i + 1;
+    const telCmdId = i + 1;
     const attrCmdId = i + 1 + N;
-    WS.subMap.set(telCmdId,  { deviceId: d.id, kind: 'telemetry' });
-    WS.subMap.set(attrCmdId, { deviceId: d.id, kind: 'attrs'     });
+    WS.subMap.set(telCmdId, { deviceId: d.id, kind: 'telemetry' });
+    WS.subMap.set(attrCmdId, { deviceId: d.id, kind: 'attrs' });
     WS.devMap.set(d.id, i);
 
     tsSubCmds.push({
@@ -2432,14 +2403,14 @@ async function connectWebSocket() {
 
     // Step 2: Open WebSocket
     const wsUrl = CONFIG.apiBase.replace(/^http/, 'ws') +
-                  `/api/ws/plugins/telemetry?token=${WS.token}`;
-    if (WS.socket) { try { WS.socket.close(); } catch {} }
+      `/api/ws/plugins/telemetry?token=${WS.token}`;
+    if (WS.socket) { try { WS.socket.close(); } catch { } }
     WS.socket = new WebSocket(wsUrl);
 
     WS.socket.onopen = () => {
       WS.failCount = 0;
-      WS.delay     = 5000;
-      WS.isLive    = true;
+      WS.delay = 5000;
+      WS.isLive = true;
       setWsStatus('live');
       console.log('[JUMC WS] Connected');
       // Step 3: Send subscriptions for all 40 devices
@@ -2484,8 +2455,8 @@ function scheduleWsReconnect() {
   }
   setWsStatus('reconnect');
   const delay = Math.min(WS.delay, WS.maxDelay);
-  WS.delay    = delay * 2; // exponential back-off
-  console.log(`[JUMC WS] Reconnecting in ${delay/1000}s (attempt ${WS.failCount}/${WS.maxFails})`);
+  WS.delay = delay * 2; // exponential back-off
+  console.log(`[JUMC WS] Reconnecting in ${delay / 1000}s (attempt ${WS.failCount}/${WS.maxFails})`);
   clearTimeout(WS.reconnectTimer);
   WS.reconnectTimer = setTimeout(connectWebSocket, delay);
 }
