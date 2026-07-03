@@ -1427,6 +1427,12 @@ function bindEvents() {
   document.getElementById('clear-alerts')?.addEventListener('click', clearAlerts);
   document.getElementById('alert-overlay')?.addEventListener('click', closeAlertPanel);
 
+  // ── Print Report button ──
+  document.getElementById('print-btn')?.addEventListener('click', printReport);
+
+  // ── Credentials Setup form ──
+  document.getElementById('setup-form')?.addEventListener('submit', handleSetupSubmit);
+
   // ── Map view button (alongside grid/list) ──
   document.querySelectorAll('[data-view]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1477,10 +1483,19 @@ document.addEventListener('DOMContentLoaded', () => {
   // 7. Show last-updated timestamp
   renderLastUpdated();
 
-  // 8. Start 10-minute auto-refresh loop (no-op if config.js not loaded)
-  startAutoRefresh();
+  // 8. Load stored credentials from localStorage (enables GitHub Pages use)
+  if (!CONFIG.username) loadStoredCredentials();
 
-  console.log('[JUMC IoT] Dashboard initialised. API polling:', CONFIG.username ? 'ENABLED' : 'DISABLED (no config.js)');
+  // 9. Check if credentials exist
+  if (CONFIG.username) {
+    // Credentials available – start real-time WebSocket (falls back to polling)
+    startWebSocket();
+  } else {
+    // No credentials – show setup modal for first-run / GitHub Pages
+    showSetupModal();
+  }
+
+  console.log('[JUMC IoT] Dashboard initialised. Credentials:', CONFIG.username ? 'FOUND' : 'NONE (setup modal shown)');
 });
 
 // =============================================================================
@@ -1940,4 +1955,522 @@ function showMapView() {
 function hideMapView() {
   const mc = document.getElementById('map-container');
   if (mc) mc.style.display = 'none';
+}
+
+// =============================================================================
+// SECTION 15 · PDF / PRINT REPORT ENGINE
+// Purpose : Generates a printable A4 status report using @media print CSS.
+//           No external library – uses window.print() with a temporary div.
+//           The report includes summary stats, anomaly flags, and full device
+//           table for all 40 devices.
+// =============================================================================
+
+/**
+ * getAnomalies
+ * @description Returns devices that have detected issues:
+ *              offline, not-configured, low power factor, or abnormal voltage.
+ * @returns {Object[]} Array of flagged device objects
+ * @used-in  generateReport()
+ */
+function getAnomalies() {
+  return DEVICES_DATA.filter(d => {
+    const state = getDeviceState(d);
+    if (state === 'offline' || state === 'no-data') return true;
+    if (d.type === 'Pump' && Object.keys(d.telemetry).length > 0) {
+      const pf = Math.abs(parseFloat(d.telemetry.data_pf) || 1);
+      const v  = parseFloat(d.telemetry.data_voltage_r_n) || 230;
+      const hz = parseFloat(d.telemetry.data_frequency) || 50;
+      if (pf > 0 && pf < 0.85)          return true;  // Low power factor
+      if ((v > 10) && (v < 210 || v > 270)) return true;  // Voltage out of range
+      if ((hz > 0) && (hz < 48 || hz > 52)) return true;  // Frequency deviation
+    }
+    return false;
+  });
+}
+
+/**
+ * getAnomalyReasons
+ * @description Returns a comma-separated list of issues for a device.
+ * @param {Object} d - Device object
+ * @returns {string} Issue descriptions
+ * @used-in  generateReport() anomaly table rows
+ */
+function getAnomalyReasons(d) {
+  const state = getDeviceState(d);
+  const reasons = [];
+  if (state === 'offline')  reasons.push('Offline');
+  if (state === 'no-data')  reasons.push('Not Configured');
+  if (d.type === 'Pump' && Object.keys(d.telemetry).length > 0) {
+    const pf = Math.abs(parseFloat(d.telemetry.data_pf) || 1);
+    const v  = parseFloat(d.telemetry.data_voltage_r_n) || 0;
+    const hz = parseFloat(d.telemetry.data_frequency) || 0;
+    if (pf > 0 && pf < 0.85)             reasons.push(`Low P.F.: ${fmtNum(pf,3)}`);
+    if (v > 10 && (v < 210 || v > 270))  reasons.push(`V R-N: ${fmtNum(v,1)}V`);
+    if (hz > 0 && (hz < 48 || hz > 52))  reasons.push(`Freq: ${fmtNum(hz,2)}Hz`);
+  }
+  return reasons.join(' · ') || '—';
+}
+
+/**
+ * generateReport
+ * @description Builds the full HTML for the printable status report.
+ * @returns {string} HTML string injected into DOM before window.print()
+ * @used-in  printReport()
+ */
+function generateReport() {
+  const s   = getStats();
+  const now = new Date();
+  const dateStr = now.toLocaleString('en-IN', {
+    weekday:'long', year:'numeric', month:'long', day:'numeric',
+    hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true
+  });
+  const anomalies = getAnomalies();
+
+  /* Summary table */
+  const summaryHTML = `
+<table class="pr-summary-table">
+  <tr>
+    <th>Total</th><th>Online</th><th>⚡ Running</th>
+    <th>✅ Standby</th><th>📴 Offline</th><th>⚠️ Not Cfg</th>
+    <th>Total kW</th><th>Total MWh</th>
+  </tr>
+  <tr>
+    <td>${s.total}</td>
+    <td>${s.online}</td>
+    <td class="pr-purple">${s.running}</td>
+    <td class="pr-green">${s.standby}</td>
+    <td class="pr-red">${s.offline}</td>
+    <td class="pr-amber">${s.noData}</td>
+    <td>${s.totalKW.toFixed(1)}</td>
+    <td>${(s.totalKWH/1000).toFixed(2)}</td>
+  </tr>
+</table>`;
+
+  /* Anomaly rows */
+  const anomalyRows = anomalies.map(d => `
+<tr>
+  <td>${d.name}</td>
+  <td>${d.location}</td>
+  <td>${d.type}</td>
+  <td class="pr-red">${getAnomalyReasons(d)}</td>
+  <td>${fmtNum(Math.abs(parseFloat(d.telemetry.data_kw)||0),2)||'—'}</td>
+  <td>${timeSince(d.lastActivityTime)}</td>
+</tr>`).join('');
+
+  /* Device state helpers */
+  const stCls = s => s==='running'?'pr-purple':s==='standby'?'pr-green':s==='offline'?'pr-red':s==='no-data'?'pr-amber':'';
+
+  /* All-device rows */
+  const deviceRows = [...DEVICES_DATA]
+    .sort((a,b) => a.location.localeCompare(b.location) || a.name.localeCompare(b.name))
+    .map((d,i) => {
+      const st  = getDeviceState(d);
+      const tel = d.telemetry;
+      const kw  = d.type==='Pump' ? fmtNum(Math.abs(parseFloat(tel.data_kw)||0),2) : '—';
+      const pf  = d.type==='Pump' ? fmtNum(Math.abs(parseFloat(tel.data_pf)||0),3) : '—';
+      const vRN = d.type==='Pump' ? fmtNum(parseFloat(tel.data_voltage_r_n)||0,1)  : '—';
+      const fr  = d.type==='Flow-Meter' ? fmtNum(parseFloat(tel.data_flow_rate||tel.flow_rate)||0,3)+' m³/h' : '—';
+      return `<tr>
+  <td>${i+1}</td>
+  <td>${d.name}</td>
+  <td>${d.location}</td>
+  <td>${d.type==='Pump'?'Pump':'Flow'}</td>
+  <td class="${stCls(st)}">${STATE_LABEL[st]}</td>
+  <td>${kw}</td><td>${pf}</td><td>${vRN}</td><td>${fr}</td>
+  <td>${timeSince(d.lastActivityTime)}</td>
+</tr>`;
+    }).join('');
+
+  return `
+<div id="print-container">
+  <div class="pr-header">
+    <div class="pr-logo">💧 JUMC IoT Dashboard</div>
+    <div class="pr-meta-right">
+      <div class="pr-title">Water Infrastructure Status Report</div>
+      <div class="pr-date">${dateStr}</div>
+      <div class="pr-org">Junagadh Municipal Corporation — Drinking Water Department</div>
+    </div>
+  </div>
+
+  <h2 class="pr-section-title">Summary</h2>
+  ${summaryHTML}
+
+  <h2 class="pr-section-title${anomalies.length?' pr-red-title':''}">
+    ${anomalies.length ? `⚠️ Anomalies — ${anomalies.length} device${anomalies.length!==1?'s':''} need attention` : '✅ No Anomalies'}
+  </h2>
+  ${anomalies.length
+    ? `<table class="pr-table">
+        <thead><tr><th>Device</th><th>Location</th><th>Type</th><th>Issues</th><th>kW</th><th>Last Seen</th></tr></thead>
+        <tbody>${anomalyRows}</tbody>
+       </table>`
+    : '<p class="pr-good">All devices are operating normally at the time of this report.</p>'}
+
+  <h2 class="pr-section-title">All Devices (${DEVICES_DATA.length}) — sorted by location</h2>
+  <table class="pr-table">
+    <thead><tr>
+      <th>#</th><th>Device Name</th><th>Location</th><th>Type</th>
+      <th>State</th><th>kW</th><th>P.F.</th><th>V R-N</th><th>Flow</th><th>Last Seen</th>
+    </tr></thead>
+    <tbody>${deviceRows}</tbody>
+  </table>
+
+  <div class="pr-footer">
+    Report generated by JUMC IoT Dashboard v2.0 &nbsp;·&nbsp; ${dateStr}
+  </div>
+</div>`;
+}
+
+/**
+ * printReport
+ * @description Injects the generated report HTML and triggers window.print().
+ *              Cleans up the injected element after the print dialog closes.
+ * @used-in  print-btn click handler in bindEvents() Section 11
+ */
+function printReport() {
+  document.getElementById('print-container')?.remove();
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = generateReport();
+  document.body.appendChild(wrapper.firstChild);
+  window.print();
+  // Clean up after print dialog (slight delay for dialog to open)
+  setTimeout(() => document.getElementById('print-container')?.remove(), 800);
+}
+
+// =============================================================================
+// SECTION 16 · CREDENTIALS & SETUP ENGINE
+// Purpose : Manages ThingsBoard credentials for GitHub Pages compatibility.
+//           Reads from config.js (local) → localStorage (GitHub Pages / any browser).
+//           Shows a setup modal when no credentials are configured.
+// =============================================================================
+
+/** @private Base64 key for credential storage */
+const CRED_KEY = 'jumc-credentials-v2';
+
+/**
+ * loadStoredCredentials
+ * @description Reads credentials from localStorage and merges into CONFIG.
+ *              Called in App init AFTER config.js values are already merged.
+ * @returns {boolean} true if credentials were found and loaded
+ * @used-in  Section 12 App init
+ */
+function loadStoredCredentials() {
+  try {
+    const raw = localStorage.getItem(CRED_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(atob(raw));
+    if (data.username) { CONFIG.username = data.username; CONFIG.password = data.password || ''; }
+    if (data.apiBase)    CONFIG.apiBase  = data.apiBase;
+    return !!CONFIG.username;
+  } catch { return false; }
+}
+
+/**
+ * saveCredentials
+ * @description Encrypts (base64) and saves credentials to localStorage.
+ * @param {string} apiBase  - ThingsBoard server URL
+ * @param {string} username - Login email
+ * @param {string} password - Login password
+ * @used-in  setup form submit
+ */
+function saveCredentials(apiBase, username, password) {
+  const data = { apiBase, username, password };
+  localStorage.setItem(CRED_KEY, btoa(JSON.stringify(data)));
+  CONFIG.apiBase   = apiBase;
+  CONFIG.username  = username;
+  CONFIG.password  = password;
+}
+
+/**
+ * clearCredentials
+ * @description Removes stored credentials and reloads the page.
+ * @used-in  (future settings panel)
+ */
+function clearCredentials() {
+  localStorage.removeItem(CRED_KEY);
+  location.reload();
+}
+
+/**
+ * showSetupModal / hideSetupModal
+ * @description Shows/hides the credentials setup modal.
+ * @used-in  App init (no credentials), setup form submit
+ */
+function showSetupModal() {
+  const modal   = document.getElementById('setup-modal');
+  const overlay = document.getElementById('setup-overlay');
+  if (!modal || !overlay) return;
+  modal.style.display   = 'block';
+  overlay.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  modal.querySelector('#setup-url').value  = CONFIG.apiBase;
+  modal.querySelector('#setup-user').focus();
+}
+function hideSetupModal() {
+  document.getElementById('setup-modal')?.style.setProperty('display','none');
+  document.getElementById('setup-overlay')?.style.setProperty('display','none');
+  document.body.style.overflow = '';
+}
+
+/**
+ * handleSetupSubmit
+ * @description Validates and saves credentials from the setup form.
+ *              Tests the login before saving, shows errors inline.
+ * @param {Event} e - form submit event
+ * @used-in  setup-form submit handler in bindEvents()
+ */
+async function handleSetupSubmit(e) {
+  e.preventDefault();
+  const url  = document.getElementById('setup-url').value.trim().replace(/\/$/, '');
+  const user = document.getElementById('setup-user').value.trim();
+  const pass = document.getElementById('setup-pass').value;
+  const btn  = document.getElementById('setup-submit');
+  const errEl = document.getElementById('setup-error');
+
+  if (errEl) errEl.remove();
+  btn.disabled    = true;
+  btn.textContent = 'Connecting…';
+
+  try {
+    // Test credentials before saving
+    const res = await fetch(`${url}/api/auth/login`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ username:user, password:pass })
+    });
+    if (!res.ok) throw new Error(`Login failed (HTTP ${res.status}) — check credentials`);
+    await res.json(); // must succeed
+
+    saveCredentials(url, user, pass);
+    hideSetupModal();
+
+    // Bootstrap the full app now that credentials are available
+    startAutoRefresh();
+    ToastNotification('✅ Connected to ThingsBoard. Loading devices…', 'success', 4000);
+  } catch (err) {
+    const errDiv = document.createElement('p');
+    errDiv.id        = 'setup-error';
+    errDiv.className = 'setup-error';
+    errDiv.textContent = '❌ ' + err.message;
+    document.getElementById('setup-form').appendChild(errDiv);
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = 'Connect Dashboard';
+  }
+}
+
+// =============================================================================
+// SECTION 17 · REAL-TIME WEBSOCKET ENGINE
+// Purpose : Subscribes to ThingsBoard WebSocket for live device updates.
+//           All 40 devices are subscribed in one WS connection.
+//           Automatically reconnects with exponential back-off on disconnect.
+//           Falls back to 10-min polling if WS fails 3 consecutive times.
+// =============================================================================
+
+/** @private WebSocket state */
+const WS = {
+  socket       : null,    // Active WebSocket instance
+  reconnectTimer: null,   // setTimeout handle for reconnect
+  failCount    : 0,       // Consecutive connection failures
+  maxFails     : 3,       // After this many fails, fall back to polling
+  delay        : 5000,    // Current reconnect delay (ms)
+  maxDelay     : 60000,   // Max reconnect delay
+  subMap       : new Map(), // cmdId → deviceId
+  devMap       : new Map(), // deviceId → DEVICES_DATA index
+  isLive       : false,   // true when WS is healthy
+  token        : null,    // Current JWT
+  renderDebounce: null,   // debounce timer for UI re-render
+};
+
+/**
+ * setWsStatus
+ * @description Updates the connection status badge in the header.
+ * @param {'live'|'reconnect'|'polling'} status
+ * @used-in  WS event handlers
+ */
+function setWsStatus(status) {
+  const el = document.getElementById('ws-status');
+  if (!el) return;
+  const labels = {
+    live      : ['🟢', 'Live', 'ws-live'],
+    reconnect : ['🟡', 'Reconnecting…', 'ws-reconnect'],
+    polling   : ['🟠', 'Polling (10 min)', 'ws-polling']
+  };
+  const [icon, text, cls] = labels[status] || labels.polling;
+  el.className   = `ws-status-badge ${cls}`;
+  el.textContent = `${icon} ${text}`;
+}
+
+/**
+ * buildWsSubscription
+ * @description Builds the ThingsBoard WS subscription command for all devices.
+ *              telemetry subs: cmdId 1..N, attribute subs: cmdId N+1..2N
+ * @returns {{ cmd: Object, subMap: Map<cmdId, deviceId> }}
+ * @used-in  connectWebSocket()
+ */
+function buildWsSubscription() {
+  WS.subMap.clear();
+  WS.devMap.clear();
+  const tsSubCmds   = [];
+  const attrSubCmds = [];
+  const N = DEVICES_DATA.length;
+
+  DEVICES_DATA.forEach((d, i) => {
+    const telCmdId  = i + 1;
+    const attrCmdId = i + 1 + N;
+    WS.subMap.set(telCmdId,  { deviceId: d.id, kind: 'telemetry' });
+    WS.subMap.set(attrCmdId, { deviceId: d.id, kind: 'attrs'     });
+    WS.devMap.set(d.id, i);
+
+    tsSubCmds.push({
+      entityType: 'DEVICE', entityId: d.id,
+      scope: 'LATEST_TELEMETRY', cmdId: telCmdId
+    });
+    attrSubCmds.push({
+      entityType: 'DEVICE', entityId: d.id,
+      scope: 'SERVER_SCOPE', cmdId: attrCmdId
+    });
+  });
+
+  return { tsSubCmds, historyCmds: [], attrSubCmds };
+}
+
+/**
+ * onWsMessage
+ * @description Processes incoming ThingsBoard WebSocket messages.
+ *              Updates DEVICES_DATA and triggers debounced UI refresh.
+ * @param {MessageEvent} event - Raw WS message event
+ * @used-in  connectWebSocket() ws.onmessage
+ */
+function onWsMessage(event) {
+  try {
+    const msg = JSON.parse(event.data);
+    const cmdId = msg.subscriptionId;
+    const entry = WS.subMap.get(cmdId);
+    if (!entry || msg.errorCode) return;
+
+    const idx = WS.devMap.get(entry.deviceId);
+    if (idx === undefined) return;
+    const device = DEVICES_DATA[idx];
+
+    if (entry.kind === 'telemetry') {
+      // Each key: { key: [[ts, value]] }
+      for (const [key, arr] of Object.entries(msg.data || {})) {
+        if (Array.isArray(arr) && arr.length > 0) {
+          const v = arr[0][1]; // [ts, value]
+          device.telemetry[key] = isNaN(v) ? v : parseFloat(v);
+        }
+      }
+    } else if (entry.kind === 'attrs') {
+      const data = msg.data || {};
+      if (data.active !== undefined) {
+        const v = data.active[0]?.[1];
+        device.active = v === 'true' || v === true;
+      }
+      if (data.lastActivityTime !== undefined) {
+        const v = data.lastActivityTime[0]?.[1];
+        device.lastActivityTime = v ? parseInt(v) : null;
+      }
+    }
+
+    // Debounce UI re-render (max once per 500ms to avoid flooding)
+    clearTimeout(WS.renderDebounce);
+    WS.renderDebounce = setTimeout(() => {
+      renderStats();
+      if (state.view === 'map') renderMap(); else renderDevices();
+      renderLastUpdated();
+    }, 500);
+  } catch { /* malformed message – ignore */ }
+}
+
+/**
+ * connectWebSocket
+ * @description Logs in → opens WebSocket → sends subscriptions.
+ *              Reconnects automatically on close/error with exponential back-off.
+ * @returns {Promise<void>}
+ * @used-in  startWebSocket(), scheduleWsReconnect()
+ */
+async function connectWebSocket() {
+  if (!CONFIG.username) return;
+  try {
+    // Step 1: Get fresh JWT
+    const res = await fetch(`${CONFIG.apiBase}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: CONFIG.username, password: CONFIG.password })
+    });
+    if (!res.ok) throw new Error(`Login HTTP ${res.status}`);
+    WS.token = (await res.json()).token;
+
+    // Step 2: Open WebSocket
+    const wsUrl = CONFIG.apiBase.replace(/^http/, 'ws') +
+                  `/api/ws/plugins/telemetry?token=${WS.token}`;
+    if (WS.socket) { try { WS.socket.close(); } catch {} }
+    WS.socket = new WebSocket(wsUrl);
+
+    WS.socket.onopen = () => {
+      WS.failCount = 0;
+      WS.delay     = 5000;
+      WS.isLive    = true;
+      setWsStatus('live');
+      console.log('[JUMC WS] Connected');
+      // Step 3: Send subscriptions for all 40 devices
+      const cmd = buildWsSubscription();
+      WS.socket.send(JSON.stringify(cmd));
+      ToastNotification('🔴 Live – Real-time updates active', 'success', 3000);
+    };
+
+    WS.socket.onmessage = onWsMessage;
+
+    WS.socket.onclose = (e) => {
+      WS.isLive = false;
+      console.warn('[JUMC WS] Closed', e.code, e.reason);
+      scheduleWsReconnect();
+    };
+
+    WS.socket.onerror = () => {
+      WS.isLive = false;
+      WS.socket?.close();
+    };
+
+  } catch (err) {
+    console.error('[JUMC WS] Connect failed:', err.message);
+    scheduleWsReconnect();
+  }
+}
+
+/**
+ * scheduleWsReconnect
+ * @description Schedules a WebSocket reconnect with exponential back-off.
+ *              Falls back to polling after maxFails consecutive failures.
+ * @used-in  WS onclose, onerror handlers
+ */
+function scheduleWsReconnect() {
+  WS.failCount++;
+  if (WS.failCount >= WS.maxFails) {
+    console.warn('[JUMC WS] Max retries reached – falling back to polling');
+    setWsStatus('polling');
+    ToastNotification('⚠️ Live connection unavailable — using 10-min polling', 'error', 6000);
+    startAutoRefresh(); // fall back to existing polling
+    return;
+  }
+  setWsStatus('reconnect');
+  const delay = Math.min(WS.delay, WS.maxDelay);
+  WS.delay    = delay * 2; // exponential back-off
+  console.log(`[JUMC WS] Reconnecting in ${delay/1000}s (attempt ${WS.failCount}/${WS.maxFails})`);
+  clearTimeout(WS.reconnectTimer);
+  WS.reconnectTimer = setTimeout(connectWebSocket, delay);
+}
+
+/**
+ * startWebSocket
+ * @description Entry point for the real-time engine. Called from App init.
+ *              If WS is unavailable, falls back to polling automatically.
+ * @used-in  Section 12 App init
+ */
+function startWebSocket() {
+  if (!CONFIG.username) return;
+  // Also keep polling as a safety net every 30 min (reduced from 10 min)
+  state.refreshTimer = setInterval(refreshData, 30 * 60 * 1000);
+  setWsStatus('reconnect');
+  connectWebSocket();
 }
