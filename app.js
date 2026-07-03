@@ -912,6 +912,10 @@ function renderDevices() {
 
   if (cnt) cnt.textContent = devs.length + ' device' + (devs.length !== 1 ? 's' : '');
 
+  // Map view is handled separately; renderDevices handles grid/list only
+  if (state.view === 'map') { showMapView(); return; }
+  hideMapView();
+
   if (!devs.length) {
     grid.style.display  = 'none';
     empty.style.display = 'flex';
@@ -1250,8 +1254,14 @@ async function refreshData() {
       results.forEach(([id, tel]) => telemetryMap.set(id, tel));
     }
 
+    // Step 3.5: Snapshot current states BEFORE merge (for alert detection)
+    const stateSnapshot = snapshotDeviceStates();
+
     // Step 4: Merge into DEVICES_DATA
     mergeApiData(apiDevices, telemetryMap);
+
+    // Step 4.5: Detect state changes and fire alerts
+    detectStateChanges(stateSnapshot);
 
     // Step 5: Update UI
     state.lastUpdated = new Date();
@@ -1262,6 +1272,9 @@ async function refreshData() {
     initFlowChart();
 
     const s = getStats();
+    // Refresh map markers if map view is active
+    if (state.view === 'map') renderMap();
+
     ToastNotification(
       `✅ Data refreshed – ${s.total} devices | ⚡ ${s.running} running | ✅ ${s.standby} standby`,
       'success'
@@ -1364,15 +1377,7 @@ function bindEvents() {
     if (searchInput) { searchInput.value = ''; state.search = ''; renderDevices(); }
   });
 
-  // ── Grid / List view toggle ──
-  document.querySelectorAll('[data-view]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('[data-view]').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.view = btn.dataset.view;
-      renderDevices();
-    });
-  });
+  // ── Grid / List / Map view toggle – handled at end of bindEvents ──
 
   // ── Modal: close button, backdrop click, ESC key ──
   document.getElementById('modal-close')?.addEventListener('click', closeModal);
@@ -1390,6 +1395,32 @@ function bindEvents() {
       document.querySelectorAll('.chart-panel').forEach(p => p.classList.remove('active'));
       document.getElementById('chart-' + target)?.classList.add('active');
       if (target === 'flow') initFlowChart(); else initTelChart();
+    });
+  });
+
+  // ── Alert bell → open panel (also requests notification permission) ──
+  document.getElementById('alert-bell')?.addEventListener('click', async () => {
+    await requestNotificationPermission();
+    openAlertPanel();
+  });
+
+  // ── Alert panel – close button + overlay ──
+  document.getElementById('close-alerts')?.addEventListener('click', closeAlertPanel);
+  document.getElementById('clear-alerts')?.addEventListener('click', clearAlerts);
+  document.getElementById('alert-overlay')?.addEventListener('click', closeAlertPanel);
+
+  // ── Map view button (alongside grid/list) ──
+  document.querySelectorAll('[data-view]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-view]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.view = btn.dataset.view;
+      if (state.view === 'map') {
+        showMapView();
+      } else {
+        hideMapView();
+        renderDevices();
+      }
     });
   });
 }
@@ -1422,6 +1453,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // 6. Start live clock
   startClock();
 
+  // 6b. Load persisted alert history from localStorage
+  loadAlertHistory();
+
   // 7. Show last-updated timestamp
   renderLastUpdated();
 
@@ -1430,3 +1464,455 @@ document.addEventListener('DOMContentLoaded', () => {
 
   console.log('[JUMC IoT] Dashboard initialised. API polling:', CONFIG.username ? 'ENABLED' : 'DISABLED (no config.js)');
 });
+
+// =============================================================================
+// SECTION 13 · ALERT ENGINE
+// Purpose : Detects device state changes between data refreshes and fires
+//           browser notifications + maintains an in-app alert history panel.
+//           Alert history persists in localStorage across page reloads.
+// =============================================================================
+
+// ── Alert config: severity + icon + message template per state transition ──
+const ALERT_RULES = {
+  // key: "oldState→newState"
+  'standby→running'  : { sev:'info',     icon:'⚡', msg: n => `${n} started running`           },
+  'offline→running'  : { sev:'info',     icon:'⚡', msg: n => `${n} back online and running`    },
+  'no-data→running'  : { sev:'info',     icon:'⚡', msg: n => `${n} now running (data appeared)` },
+  'running→standby'  : { sev:'warning',  icon:'✅', msg: n => `${n} pump stopped – now standby` },
+  'offline→standby'  : { sev:'info',     icon:'✅', msg: n => `${n} is back online`             },
+  'no-data→standby'  : { sev:'info',     icon:'🔌', msg: n => `${n} started sending data`       },
+  'running→offline'  : { sev:'critical', icon:'📴', msg: n => `${n} WENT OFFLINE while running!` },
+  'standby→offline'  : { sev:'critical', icon:'📴', msg: n => `${n} went offline`               },
+  'no-data→offline'  : { sev:'warning',  icon:'📴', msg: n => `${n} disconnected`               },
+  'running→no-data'  : { sev:'critical', icon:'⚠️', msg: n => `${n} lost telemetry while running` },
+  'standby→no-data'  : { sev:'warning',  icon:'⚠️', msg: n => `${n} stopped sending data`       },
+  'offline→no-data'  : { sev:'warning',  icon:'⚠️', msg: n => `${n} data cleared`               },
+};
+
+/** @private Max alerts to keep in history */
+const MAX_ALERT_HISTORY = 80;
+
+/** @private In-memory alert log (newest first) */
+let alertHistory = [];
+
+/**
+ * loadAlertHistory
+ * @description Loads persisted alert history from localStorage on boot.
+ * @used-in  App init (Section 12)
+ */
+function loadAlertHistory() {
+  try {
+    const stored = localStorage.getItem('jumc-alert-history');
+    if (stored) alertHistory = JSON.parse(stored);
+  } catch { alertHistory = []; }
+  renderAlertPanel();
+  updateAlertBadge();
+}
+
+/**
+ * saveAlertHistory
+ * @description Persists alert history to localStorage (max 80 entries).
+ * @used-in  addAlert()
+ */
+function saveAlertHistory() {
+  try {
+    localStorage.setItem('jumc-alert-history', JSON.stringify(alertHistory.slice(0, MAX_ALERT_HISTORY)));
+  } catch { /* storage full – ignore */ }
+}
+
+/**
+ * requestNotificationPermission
+ * @description Prompts the user for browser notification permission once.
+ *              Call this on the first user gesture (button click).
+ * @returns {Promise<boolean>} true if permission granted
+ * @used-in  Alert bell button click (bindEvents Section 11)
+ */
+async function requestNotificationPermission() {
+  if (!('Notification' in window)) return false;
+  if (Notification.permission === 'granted') return true;
+  if (Notification.permission === 'denied') return false;
+  const perm = await Notification.requestPermission();
+  return perm === 'granted';
+}
+
+/**
+ * showBrowserNotification
+ * @description Fires a native browser notification.
+ * @param {string} title    - Notification title
+ * @param {string} body     - Notification body text
+ * @param {'critical'|'warning'|'info'} sev - Severity (used for icon badge)
+ * @used-in  addAlert()
+ */
+function showBrowserNotification(title, body, sev) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const icons = { critical: '📴', warning: '⚠️', info: '✅' };
+  try {
+    const n = new Notification(title, {
+      body,
+      icon: '/favicon.ico',
+      badge: '/favicon.ico',
+      tag: 'jumc-iot-' + Date.now(),
+      requireInteraction: sev === 'critical'
+    });
+    // Auto-close non-critical after 5s
+    if (sev !== 'critical') setTimeout(() => n.close(), 5000);
+  } catch { /* notifications blocked by browser policy */ }
+}
+
+/**
+ * addAlert
+ * @description Adds an alert to history, updates badge, fires browser notification.
+ * @param {Object} device   - Device data object
+ * @param {string} oldState - Previous state key
+ * @param {string} newState - New state key
+ * @used-in  detectStateChanges()
+ */
+function addAlert(device, oldState, newState) {
+  const rule = ALERT_RULES[`${oldState}→${newState}`];
+  if (!rule) return;
+
+  const alert = {
+    id       : Date.now() + Math.random(),
+    deviceId : device.id,
+    deviceName: device.name,
+    location : device.location,
+    type     : device.type,
+    oldState,
+    newState,
+    sev      : rule.sev,
+    icon     : rule.icon,
+    message  : rule.msg(device.name),
+    ts       : Date.now()
+  };
+
+  alertHistory.unshift(alert);
+  if (alertHistory.length > MAX_ALERT_HISTORY) alertHistory.pop();
+  saveAlertHistory();
+  renderAlertPanel();
+  updateAlertBadge();
+  showBrowserNotification(
+    `JUMC IoT – ${rule.icon} ${device.location}`,
+    alert.message,
+    rule.sev
+  );
+}
+
+/** @private Unread alert count (resets when panel is opened) */
+let unreadAlertCount = 0;
+
+/**
+ * updateAlertBadge
+ * @description Updates the red badge count on the bell icon.
+ * @used-in  addAlert(), openAlertPanel(), loadAlertHistory()
+ */
+function updateAlertBadge() {
+  const badge = document.getElementById('alert-badge');
+  if (!badge) return;
+  if (unreadAlertCount > 0) {
+    badge.textContent = unreadAlertCount > 99 ? '99+' : unreadAlertCount;
+    badge.style.display = 'flex';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+/**
+ * renderAlertPanel
+ * @description Re-renders the alert list inside the panel.
+ * @used-in  addAlert(), openAlertPanel(), clearAlerts()
+ */
+function renderAlertPanel() {
+  const list = document.getElementById('alert-list');
+  if (!list) return;
+
+  if (!alertHistory.length) {
+    list.innerHTML = '<div class="alert-empty">No alerts yet — monitoring all devices…</div>';
+    return;
+  }
+
+  const timeAgo = ts => {
+    const m = Math.floor((Date.now() - ts) / 60000);
+    if (m < 1)  return 'just now';
+    if (m < 60) return m + 'm ago';
+    const h = Math.floor(m / 60);
+    if (h < 24) return h + 'h ago';
+    return new Date(ts).toLocaleDateString('en-IN', { day:'2-digit', month:'short' });
+  };
+
+  list.innerHTML = alertHistory.map(a => `
+<div class="alert-item sev-${a.sev}" data-device-id="${a.deviceId}" role="listitem">
+  <span class="alert-severity">${a.icon}</span>
+  <div class="alert-body">
+    <div class="alert-title">${a.message}</div>
+    <div class="alert-sub">${locIcon(a.location)} ${a.location} · ${a.type}
+      · <span style="color:var(--text2)">${STATE_LABEL[a.oldState]} → ${STATE_LABEL[a.newState]}</span>
+    </div>
+  </div>
+  <span class="alert-time">${timeAgo(a.ts)}</span>
+</div>`).join('');
+
+  // Click alert to open device modal
+  list.querySelectorAll('.alert-item[data-device-id]').forEach(el => {
+    el.addEventListener('click', () => {
+      const dev = DEVICES_DATA.find(d => d.id === el.dataset.deviceId);
+      if (dev) { closeAlertPanel(); openModal(dev); }
+    });
+    el.style.cursor = 'pointer';
+  });
+}
+
+/**
+ * openAlertPanel / closeAlertPanel
+ * @description Toggles the slide-in alert history panel.
+ * @used-in  Bell button click, close button, overlay click
+ */
+function openAlertPanel() {
+  document.getElementById('alert-panel')?.classList.add('open');
+  document.getElementById('alert-overlay')?.classList.add('open');
+  document.getElementById('alert-panel')?.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+  // Mark alerts as read
+  unreadAlertCount = 0;
+  updateAlertBadge();
+  renderAlertPanel(); // refresh timestamps
+}
+function closeAlertPanel() {
+  document.getElementById('alert-panel')?.classList.remove('open');
+  document.getElementById('alert-overlay')?.classList.remove('open');
+  document.getElementById('alert-panel')?.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
+/**
+ * clearAlerts
+ * @description Clears all alert history.
+ * @used-in  "Clear all" button in alert panel
+ */
+function clearAlerts() {
+  alertHistory = [];
+  unreadAlertCount = 0;
+  saveAlertHistory();
+  renderAlertPanel();
+  updateAlertBadge();
+}
+
+/**
+ * snapshotDeviceStates
+ * @description Captures current state of all devices as a Map.
+ * @returns {Map<string, string>} deviceId → stateKey
+ * @used-in  refreshData() – called BEFORE merging new API data
+ */
+function snapshotDeviceStates() {
+  const snap = new Map();
+  DEVICES_DATA.forEach(d => snap.set(d.id, getDeviceState(d)));
+  return snap;
+}
+
+/**
+ * detectStateChanges
+ * @description Compares old snapshot to current state and fires alerts for changes.
+ * @param {Map<string, string>} oldSnap - Snapshot taken before data refresh
+ * @used-in  refreshData() – called AFTER merging new API data
+ */
+function detectStateChanges(oldSnap) {
+  DEVICES_DATA.forEach(device => {
+    const oldState = oldSnap.get(device.id);
+    const newState = getDeviceState(device);
+    if (oldState && newState && oldState !== newState) {
+      addAlert(device, oldState, newState);
+      unreadAlertCount++;
+    }
+  });
+}
+
+// =============================================================================
+// SECTION 14 · MAP VIEW
+// Purpose : Renders an interactive Leaflet.js map with one coloured marker per
+//           location. Marker colour reflects the worst device state at that site.
+//           Clicking a marker shows a popup listing all devices at that location.
+//           Clicking a device in the popup opens the full device detail modal.
+// =============================================================================
+
+/**
+ * LOCATION_COORDS
+ * @description Lat/lng for each device location, extracted from operator notebook.
+ *              Used by buildMarker() and renderMap().
+ *              Key must match device.location values in DEVICES_DATA exactly.
+ */
+const LOCATION_COORDS = {
+  'Anandpur'     : { lat: 21.400861, lng: 70.525267, label: 'Anandpur Dam'          },
+  'Padariya'     : { lat: 21.470936, lng: 70.472886, label: 'Padariya Filter Plant' },
+  'Sardarbag'    : { lat: 21.520165, lng: 70.448609, label: 'Sardarbag'             },
+  'Gopalwadi'    : { lat: 21.526732, lng: 70.430344, label: 'Gopalwadi'             },
+  'Timbavadi'    : { lat: 21.504558, lng: 70.433469, label: 'Timbavadi'             },
+  'Saragvada'    : { lat: 21.534045, lng: 70.448781, label: 'Saragvada'             },
+  'Adityanagar'  : { lat: 21.539650, lng: 70.451628, label: 'Adityanagar'           },
+  'Varun Pumping': { lat: 21.520821, lng: 70.458138, label: 'Varun Pumping Station' },
+  'Dharmaveda'   : { lat: 21.499883, lng: 70.457179, label: 'Dharmaveda'            },
+  'Dharamaveda'  : { lat: 21.499883, lng: 70.457179, label: 'Dharamaveda'           },
+  'Khamdhrol'    : { lat: 21.550980, lng: 70.453419, label: 'Khamdhrol'             },
+  'Dolatpara'    : { lat: 21.551478, lng: 70.470424, label: 'Dolatpara'             },
+};
+
+/** @private Leaflet map instance */
+let leafletMap = null;
+/** @private Array of active Leaflet layer markers (for cleanup) */
+let mapMarkers = [];
+
+/**
+ * getLocationWorstState
+ * @description Returns the most-severe state among all devices at a location.
+ *              Priority: offline > running > no-data > standby
+ * @param {string} location - Location name
+ * @returns {string} stateKey
+ * @used-in  buildMarker()
+ */
+function getLocationWorstState(location) {
+  const devs = DEVICES_DATA.filter(d => d.location === location);
+  if (!devs.length) return 'no-data';
+  const states = devs.map(d => getDeviceState(d));
+  if (states.includes('offline'))  return 'offline';
+  if (states.includes('running'))  return 'running';
+  if (states.includes('no-data'))  return 'no-data';
+  return 'standby';
+}
+
+/**
+ * buildMarkerIcon
+ * @description Creates a Leaflet DivIcon (HTML-based) for a location marker.
+ * @param {string} worstState - State key from getLocationWorstState()
+ * @param {number} count      - Total device count at location
+ * @param {string} label      - Short location label
+ * @returns {L.DivIcon}
+ * @used-in  renderMap()
+ */
+function buildMarkerIcon(worstState, count, label) {
+  const cls = `mm-${worstState.replace('-','data')==='mmno-data'?'nodata':worstState}`;
+  return L.divIcon({
+    className: 'custom-marker',
+    html: `<div class="map-marker">
+      <div class="map-marker-circle ${cls}">${count}</div>
+      <div class="map-marker-label">${label}</div>
+    </div>`,
+    iconSize:   [60, 52],
+    iconAnchor: [30, 52],
+    popupAnchor:[0, -54]
+  });
+}
+
+/**
+ * buildPopupHTML
+ * @description Builds the HTML string for the Leaflet popup showing all devices at a location.
+ * @param {string}   location  - Location name
+ * @param {Object[]} devices   - Array of device objects at this location
+ * @returns {string} HTML string
+ * @used-in  renderMap()
+ */
+function buildPopupHTML(location, devices) {
+  const rows = devices.map(d => {
+    const ds = getDeviceState(d);
+    const typeEmoji = d.type === 'Pump' ? '⚙️' : '💧';
+    return `<div class="map-popup-device" data-device-id="${d.id}">
+      <div>
+        <div class="map-popup-device-name">${typeEmoji} ${d.name}</div>
+        <div class="map-popup-device-type">${d.type}</div>
+      </div>
+      <span class="map-popup-badge ${ds}">${STATE_LABEL[ds]}</span>
+    </div>`;
+  }).join('');
+  return `<div class="map-popup-header">${locIcon(location)} ${location} <span style="color:var(--text3);font-weight:400;font-size:11px">(${devices.length} device${devices.length!==1?'s':''})</span></div>
+<div class="map-popup-devices">${rows}</div>`;
+}
+
+/**
+ * initMap
+ * @description Creates the Leaflet map centred on Junagadh.
+ *              Called once on first map view activation.
+ * @used-in  showMapView()
+ */
+function initMap() {
+  if (leafletMap) return; // already initialised
+  if (typeof L === 'undefined') { console.error('[JUMC Map] Leaflet not loaded'); return; }
+
+  leafletMap = L.map('iot-map', {
+    center    : [21.521901, 70.457726], // Junagadh city centre
+    zoom      : 13,
+    zoomControl: true,
+    attributionControl: true
+  });
+
+  // OpenStreetMap tile layer (free, no API key)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom    : 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(leafletMap);
+}
+
+/**
+ * renderMap
+ * @description Clears all existing markers and places fresh markers for each
+ *              location that has devices AND has known coordinates.
+ * @used-in  showMapView(), refreshData() when map view is active
+ */
+function renderMap() {
+  if (!leafletMap) return;
+
+  // Clear old markers
+  mapMarkers.forEach(m => m.remove());
+  mapMarkers = [];
+
+  // Group devices by location
+  const groups = {};
+  DEVICES_DATA.forEach(d => {
+    if (!groups[d.location]) groups[d.location] = [];
+    groups[d.location].push(d);
+  });
+
+  // Place one marker per location that has coordinates
+  Object.entries(groups).forEach(([loc, devs]) => {
+    const coords = LOCATION_COORDS[loc];
+    if (!coords) return; // no coordinates for this location yet
+
+    const worstState = getLocationWorstState(loc);
+    const icon       = buildMarkerIcon(worstState, devs.length, coords.label);
+    const marker     = L.marker([coords.lat, coords.lng], { icon }).addTo(leafletMap);
+
+    const popup = L.popup({ maxWidth: 280, minWidth: 220 })
+      .setContent(buildPopupHTML(loc, devs));
+
+    marker.bindPopup(popup);
+
+    // Attach device click handlers after popup opens
+    marker.on('popupopen', () => {
+      setTimeout(() => {
+        document.querySelectorAll('.map-popup-device[data-device-id]').forEach(el => {
+          el.addEventListener('click', () => {
+            const dev = DEVICES_DATA.find(d => d.id === el.dataset.deviceId);
+            if (dev) { marker.closePopup(); openModal(dev); }
+          });
+        });
+      }, 50);
+    });
+
+    mapMarkers.push(marker);
+  });
+}
+
+/**
+ * showMapView / hideMapView
+ * @description Toggles visibility between device grid and map container.
+ * @used-in  renderDevices() map branch, view button handler
+ */
+function showMapView() {
+  document.getElementById('device-grid')?.style.setProperty('display', 'none');
+  document.getElementById('empty-state')?.style.setProperty('display', 'none');
+  const mc = document.getElementById('map-container');
+  if (mc) mc.style.display = 'block';
+  initMap();
+  // Leaflet needs a size invalidation after display:block
+  setTimeout(() => { leafletMap?.invalidateSize(); renderMap(); }, 100);
+}
+function hideMapView() {
+  const mc = document.getElementById('map-container');
+  if (mc) mc.style.display = 'none';
+}
