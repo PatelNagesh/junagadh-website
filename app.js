@@ -528,10 +528,15 @@ function DeviceCard(device) {
       ? PumpMetrics(device.telemetry, isRunning)
       : FlowMetrics(device.telemetry);
 
+  const anomalyStr = typeof getAnomalyReasons === 'function' ? getAnomalyReasons(device) : '—';
+  const anomalyBadge = anomalyStr !== '—'
+    ? `<div class="card-anomaly-flag" title="Issues: ${anomalyStr}">⚠️</div>`
+    : '';
+
   return `
 <div class="device-card ${devState}" data-id="${device.id}" tabindex="0" role="button"
      aria-label="${device.name} – ${STATE_LABEL[devState]}">
-
+  ${anomalyBadge}
   <!-- Card Header: icon · name · location · status badge -->
   <div class="card-header">
     <div class="card-icon ${isPump ? 'icon-pump' : 'icon-flow'}">${typeIcon}</div>
@@ -923,11 +928,35 @@ function renderDevices() {
   }
 
   empty.style.display = 'none';
-  grid.className      = state.view === 'grid' ? 'device-grid' : 'device-list';
-  grid.style.display  = state.view === 'grid' ? 'grid'        : 'flex';
 
-  // Build HTML using DeviceCard() component
-  grid.innerHTML = devs.map(DeviceCard).join('');
+  if (state.view === 'grouped') {
+    grid.className = 'device-grouped';
+    grid.style.display = 'block';
+
+    const groups = {};
+    devs.forEach(d => {
+      if (!groups[d.location]) groups[d.location] = [];
+      groups[d.location].push(d);
+    });
+
+    const sortedLocations = Object.keys(groups).sort();
+    grid.innerHTML = sortedLocations.map(loc => `
+      <div class="location-group">
+        <div class="location-group-header">
+          <h3>${loc}</h3>
+          <span class="location-group-count">${groups[loc].length} Devices</span>
+        </div>
+        <div class="device-grid">
+          ${groups[loc].map(DeviceCard).join('')}
+        </div>
+      </div>
+    `).join('');
+  } else {
+    grid.className      = state.view === 'grid' ? 'device-grid' : 'device-list';
+    grid.style.display  = state.view === 'grid' ? 'grid'        : 'flex';
+    // Build HTML using DeviceCard() component
+    grid.innerHTML = devs.map(DeviceCard).join('');
+  }
 
   // Attach card interactions
   grid.querySelectorAll('.device-card').forEach((el, i) => {
