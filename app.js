@@ -1333,6 +1333,9 @@ async function refreshData() {
 function startAutoRefresh() {
   if (!CONFIG.username) return;  // no-op if config.js not loaded
 
+  if (state.refreshTimer) clearInterval(state.refreshTimer);
+  if (state.countdownTimer) clearInterval(state.countdownTimer);
+
   // Immediate first fetch
   refreshData();
 
