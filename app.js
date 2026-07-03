@@ -2331,18 +2331,20 @@ function buildWsSubscription() {
   const N = DEVICES_DATA.length;
 
   DEVICES_DATA.forEach((d, i) => {
+    if (!d.id) return;
+    const deviceIdStr = typeof d.id === 'object' ? d.id.id : d.id;
     const telCmdId  = i + 1;
     const attrCmdId = i + 1 + N;
-    WS.subMap.set(telCmdId,  { deviceId: d.id, kind: 'telemetry' });
-    WS.subMap.set(attrCmdId, { deviceId: d.id, kind: 'attrs'     });
-    WS.devMap.set(d.id, i);
+    WS.subMap.set(telCmdId,  { deviceId: deviceIdStr, kind: 'telemetry' });
+    WS.subMap.set(attrCmdId, { deviceId: deviceIdStr, kind: 'attrs'     });
+    WS.devMap.set(deviceIdStr, i);
 
     tsSubCmds.push({
-      entityType: 'DEVICE', entityId: d.id,
+      entityType: 'DEVICE', entityId: deviceIdStr,
       scope: 'LATEST_TELEMETRY', cmdId: telCmdId
     });
     attrSubCmds.push({
-      entityType: 'DEVICE', entityId: d.id,
+      entityType: 'DEVICE', entityId: deviceIdStr,
       scope: 'SERVER_SCOPE', cmdId: attrCmdId
     });
   });
