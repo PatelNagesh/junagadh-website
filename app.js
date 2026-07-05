@@ -530,6 +530,7 @@ function DeviceCard(device) {
 
   return `
 <div class="device-card ${devState}" data-id="${device.id}" tabindex="0" role="button"
+     onclick="openModal('${device.id}')"
      aria-label="${device.name} – ${STATE_LABEL[devState]}">
 
   <!-- Card Header: icon · name · location · status badge -->
@@ -682,7 +683,16 @@ function ModalContent(device) {
 </div>`;
   }
 
-  return headerHTML + metaHTML + telHTML;
+  const chartHTML = `
+<div class="device-history-chart-wrapper">
+  <div id="history-chart-loading" class="modal-no-data loading-chart">
+    <div class="spinner"></div>
+    <p>Fetching 24h history...</p>
+  </div>
+  <canvas id="device-history-chart" style="display:none"></canvas>
+</div>`;
+
+  return headerHTML + metaHTML + telHTML + chartHTML;
 }
 
 /**
@@ -955,13 +965,18 @@ function renderLastUpdated() {
  * @param {Object} device - Device object from DEVICES_DATA
  * @used-in  DeviceCard click handler, renderDevices()
  */
-function openModal(device) {
+function openModal(deviceId) {
+  const device = typeof deviceId === 'string' ? DEVICES_DATA.find(d => d.id === deviceId) : deviceId;
   if (!device) return;
   const modal = document.getElementById('device-modal');
   const content = document.getElementById('modal-content');
   content.innerHTML = ModalContent(device);
   modal.classList.add('open');
   document.body.style.overflow = 'hidden';
+
+  if (typeof fetchAndRenderDeviceHistory === 'function') {
+    fetchAndRenderDeviceHistory(device);
+  }
 }
 
 /**
@@ -2484,4 +2499,92 @@ function startWebSocket() {
   if (!CONFIG.username) return;
   setWsStatus('reconnect');
   connectWebSocket();
+}
+
+/* ═══════════════════════════════════════
+   HISTORICAL DATA ENGINE
+════════════════════════════════════════ */
+async function apiGetHistoricalTelemetry(deviceId, keys, startTs, endTs, token) {
+  const url = `${CONFIG.apiBase}/api/plugins/telemetry/DEVICE/${deviceId}/values/timeseries?keys=${keys}&startTs=${startTs}&endTs=${endTs}&limit=1000`;
+  const res = await fetch(url, { headers: { 'X-Authorization': 'Bearer ' + token } });
+  if (!res.ok) throw new Error('History fetch failed');
+  return res.json();
+}
+
+let deviceHistoryChartInstance = null;
+
+async function fetchAndRenderDeviceHistory(device) {
+  const loadingDiv = document.getElementById('history-chart-loading');
+  const canvas = document.getElementById('device-history-chart');
+  if (!loadingDiv || !canvas) return;
+
+  try {
+    const isPump = device.type === 'Pump';
+    const metricKey = isPump ? 'data_kw' : 'data_flow_rate';
+    const metricLabel = isPump ? 'Power (kW)' : 'Flow Rate (m³/h)';
+    const endTs = Date.now();
+    const startTs = endTs - (24 * 60 * 60 * 1000); // last 24h
+    const token = await apiLogin();
+
+    const historyData = await apiGetHistoricalTelemetry(device.id, metricKey, startTs, endTs, token);
+    
+    const datapoints = historyData[metricKey] || [];
+    datapoints.sort((a, b) => a.ts - b.ts);
+
+    const labels = datapoints.map(dp => {
+      const d = new Date(dp.ts);
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    });
+    const values = datapoints.map(dp => parseFloat(dp.value));
+
+    loadingDiv.style.display = 'none';
+    canvas.style.display = 'block';
+
+    if (deviceHistoryChartInstance) {
+      deviceHistoryChartInstance.destroy();
+    }
+
+    const ctx = canvas.getContext('2d');
+    deviceHistoryChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: metricLabel,
+          data: values,
+          borderColor: isPump ? '#10b981' : '#3b82f6',
+          backgroundColor: isPump ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 0,
+          pointHoverRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { mode: 'index', intersect: false }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(255,255,255,0.05)' },
+            ticks: { color: 'rgba(255,255,255,0.5)', maxTicksLimit: 6 }
+          },
+          y: {
+            grid: { color: 'rgba(255,255,255,0.05)' },
+            ticks: { color: 'rgba(255,255,255,0.5)' },
+            beginAtZero: true
+          }
+        },
+        interaction: { mode: 'nearest', axis: 'x', intersect: false }
+      }
+    });
+
+  } catch (err) {
+    console.error('History fetch error:', err);
+    loadingDiv.innerHTML = '<p>⚠️ Failed to load history</p>';
+  }
 }
