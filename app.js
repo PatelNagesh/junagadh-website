@@ -925,10 +925,10 @@ function renderDevices() {
   if (cnt) cnt.textContent = devs.length + ' device' + (devs.length !== 1 ? 's' : '');
 
   // Map view is handled separately
-  if (state.view === 'map') { 
+  if (state.view === 'map') {
     document.getElementById('pagination-controls').style.display = 'none';
-    showMapView(); 
-    return; 
+    showMapView();
+    return;
   }
   hideMapView();
 
@@ -955,7 +955,7 @@ function renderDevices() {
     // Grouped list view: sort ALL filtered devices by location before paginating
     devs.sort((a, b) => a.location.localeCompare(b.location) || a.name.localeCompare(b.name));
     pageDevs = devs.slice(startIdx, startIdx + state.pageSize);
-    
+
     let html = '';
     let lastLocation = null;
     pageDevs.forEach(d => {
@@ -2348,16 +2348,16 @@ async function handleSetupSubmit(e) {
 
 /** @private WebSocket state */
 const WS = {
-  socket       : null,    // Active WebSocket instance
+  socket: null,    // Active WebSocket instance
   reconnectTimer: null,   // setTimeout handle for reconnect
-  failCount    : 0,       // Consecutive connection failures
-  maxFails     : 3,       // After this many fails, fall back to polling
-  delay        : 5000,    // Current reconnect delay (ms)
-  maxDelay     : 60000,   // Max reconnect delay
-  subMap       : new Map(), // cmdId → deviceId
-  devMap       : new Map(), // deviceId → DEVICES_DATA index
-  isLive       : false,   // true when WS is healthy
-  token        : null,    // Current JWT
+  failCount: 0,       // Consecutive connection failures
+  maxFails: 3,       // After this many fails, fall back to polling
+  delay: 5000,    // Current reconnect delay (ms)
+  maxDelay: 60000,   // Max reconnect delay
+  subMap: new Map(), // cmdId → deviceId
+  devMap: new Map(), // deviceId → DEVICES_DATA index
+  isLive: false,   // true when WS is healthy
+  token: null,    // Current JWT
   renderDebounce: null,   // debounce timer for UI re-render
 };
 
@@ -2371,12 +2371,12 @@ function setWsStatus(status) {
   const el = document.getElementById('ws-status');
   if (!el) return;
   const labels = {
-    live      : ['🟢', 'Live', 'ws-live'],
-    reconnect : ['🟡', 'Reconnecting…', 'ws-reconnect'],
-    polling   : ['🟠', 'Polling (10 min)', 'ws-polling']
+    live: ['🟢', 'Live', 'ws-live'],
+    reconnect: ['🟡', 'Reconnecting…', 'ws-reconnect'],
+    polling: ['🟠', 'Polling (10 min)', 'ws-polling']
   };
   const [icon, text, cls] = labels[status] || labels.polling;
-  el.className   = `ws-status-badge ${cls}`;
+  el.className = `ws-status-badge ${cls}`;
   el.textContent = `${icon} ${text}`;
 }
 
@@ -2390,17 +2390,17 @@ function setWsStatus(status) {
 function buildWsSubscription() {
   WS.subMap.clear();
   WS.devMap.clear();
-  const tsSubCmds   = [];
+  const tsSubCmds = [];
   const attrSubCmds = [];
   const N = DEVICES_DATA.length;
 
   DEVICES_DATA.forEach((d, i) => {
     if (!d.id) return;
     const deviceIdStr = typeof d.id === 'object' ? d.id.id : d.id;
-    const telCmdId  = i + 1;
+    const telCmdId = i + 1;
     const attrCmdId = i + 1 + N;
-    WS.subMap.set(telCmdId,  { deviceId: deviceIdStr, kind: 'telemetry' });
-    WS.subMap.set(attrCmdId, { deviceId: deviceIdStr, kind: 'attrs'     });
+    WS.subMap.set(telCmdId, { deviceId: deviceIdStr, kind: 'telemetry' });
+    WS.subMap.set(attrCmdId, { deviceId: deviceIdStr, kind: 'attrs' });
     WS.devMap.set(deviceIdStr, i);
 
     tsSubCmds.push({
@@ -2480,14 +2480,14 @@ async function connectWebSocket() {
 
     // Step 2: Open WebSocket
     const wsUrl = CONFIG.apiBase.replace(/^http/, 'ws') +
-                  `/api/ws/plugins/telemetry?token=${WS.token}`;
-    if (WS.socket) { try { WS.socket.close(); } catch {} }
+      `/api/ws/plugins/telemetry?token=${WS.token}`;
+    if (WS.socket) { try { WS.socket.close(); } catch { } }
     WS.socket = new WebSocket(wsUrl);
 
     WS.socket.onopen = () => {
       WS.failCount = 0;
-      WS.delay     = 5000;
-      WS.isLive    = true;
+      WS.delay = 5000;
+      WS.isLive = true;
       setWsStatus('live');
       console.log('[JUMC WS] Connected');
       // Step 3: Send subscriptions for all 40 devices
@@ -2532,8 +2532,8 @@ function scheduleWsReconnect() {
   }
   setWsStatus('reconnect');
   const delay = Math.min(WS.delay, WS.maxDelay);
-  WS.delay    = delay * 2; // exponential back-off
-  console.log(`[JUMC WS] Reconnecting in ${delay/1000}s (attempt ${WS.failCount}/${WS.maxFails})`);
+  WS.delay = delay * 2; // exponential back-off
+  console.log(`[JUMC WS] Reconnecting in ${delay / 1000}s (attempt ${WS.failCount}/${WS.maxFails})`);
   clearTimeout(WS.reconnectTimer);
   WS.reconnectTimer = setTimeout(connectWebSocket, delay);
 }
@@ -2576,7 +2576,7 @@ async function fetchAndRenderDeviceHistory(device) {
     const token = await apiLogin();
 
     const historyData = await apiGetHistoricalTelemetry(device.id, metricKey, startTs, endTs, token);
-    
+
     const datapoints = historyData[metricKey] || [];
     datapoints.sort((a, b) => a.ts - b.ts);
 
@@ -2639,11 +2639,10 @@ async function fetchAndRenderDeviceHistory(device) {
 }
 
 
-  // ── Pagination Listeners ──
-  document.getElementById('page-prev')?.addEventListener('click', () => {
-    if (state.page > 1) { state.page--; renderDevices(); }
-  });
-  document.getElementById('page-next')?.addEventListener('click', () => {
-    state.page++; renderDevices();
-  });
-\n      x.type.toLowerCase().includes(q) ||
+// ── Pagination Listeners ──
+document.getElementById('page-prev')?.addEventListener('click', () => {
+  if (state.page > 1) { state.page--; renderDevices(); }
+});
+document.getElementById('page-next')?.addEventListener('click', () => {
+  state.page++; renderDevices();
+});
