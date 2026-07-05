@@ -2646,3 +2646,4 @@ async function fetchAndRenderDeviceHistory(device) {
   document.getElementById('page-next')?.addEventListener('click', () => {
     state.page++; renderDevices();
   });
+\n      x.type.toLowerCase().includes(q) ||
