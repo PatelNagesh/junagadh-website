@@ -1989,7 +1989,8 @@ function renderMap() {
 
     const worstState = getLocationWorstState(loc);
     const icon = buildMarkerIcon(worstState, devs.length, coords.label);
-    const marker = L.marker([coords.lat, coords.lng], { icon }).addTo(leafletMap);
+    const marker = L.marker([coords.lat, coords.lng], { icon });
+    markerClusterGroup.addLayer(marker);
 
     const popup = L.popup({ maxWidth: 280, minWidth: 220 })
       .setContent(buildPopupHTML(loc, devs));
@@ -2010,6 +2011,9 @@ function renderMap() {
 
     mapMarkers.push(marker);
   });
+
+  // Add cluster group to map
+  leafletMap.addLayer(markerClusterGroup);
 
   // Auto-fit map to show ALL placed markers
   if (mapMarkers.length > 0) {
@@ -2638,6 +2642,12 @@ async function fetchAndRenderDeviceHistory(device) {
   }
 }
 
+
+// ── Refresh Interval Listener ──
+document.getElementById('refresh-interval')?.addEventListener('change', e => {
+  CONFIG.pollIntervalMs = parseInt(e.target.value, 10);
+  startAutoRefresh();
+});
 
 // ── Pagination Listeners ──
 document.getElementById('page-prev')?.addEventListener('click', () => {

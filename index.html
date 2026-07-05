@@ -14,6 +14,12 @@
   <!-- Leaflet.js – Map View (free, OpenStreetMap, no API key needed) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Leaflet MarkerCluster -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
   <!-- Stylesheet -->
   <link rel="stylesheet" href="style.css"/>
   <!--
@@ -222,6 +228,14 @@
       />
       <button class="search-clear" id="clear-search" title="Clear search" aria-label="Clear search">✕</button>
     </div>
+
+    <!-- Refresh Interval -->
+    <select class="filter-sel" id="refresh-interval" aria-label="Refresh interval" style="margin-left: 10px; padding: 6px 12px; width: auto; border-radius: 8px;">
+      <option value="60000">⏱️ 1 min</option>
+      <option value="300000">⏱️ 5 min</option>
+      <option value="600000" selected>⏱️ 10 min</option>
+    </select>
+
 
     <!-- Filters -->
     <div class="filter-group" role="group" aria-label="Filter by status">

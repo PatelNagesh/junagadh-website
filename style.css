@@ -1097,3 +1097,25 @@ select.filter-sel:focus { border-color: var(--accent); }
   border-radius: 12px;
   border: 1px solid var(--border);
 }
+\n
+/* ═══════════════════════════════════════
+   ANALYTICS ENHANCEMENTS
+════════════════════════════════════════ */
+@keyframes livePulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.stat-card.s-online .stat-icon {
+  animation: livePulse 2s infinite ease-in-out;
+}
+
+/* Subtle gradient background for Power and Energy */
+.stat-card:nth-child(6) /* Active Power */ {
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.1), var(--surface));
+  border-color: rgba(20, 184, 166, 0.2);
+}
+.stat-card:nth-child(7) /* Total Energy */ {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), var(--surface));
+  border-color: rgba(245, 158, 11, 0.2);
+}
