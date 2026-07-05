@@ -115,6 +115,8 @@ const state = {
   locationFilter: 'all',          // 'all'|<location string>
   search: '',             // free-text search
   view: 'grid',         // 'grid'|'list'
+  page: 1,                // Current pagination page
+  pageSize: 12,           // Devices per page
   sortBy: 'name',         // 'name'|'status'|'location'|'kw'
   sortDir: 'asc',          // 'asc'|'desc'
   lastUpdated: new Date('2026-07-02T21:03:37+05:30'),  // timestamp of last data sync
@@ -922,13 +924,18 @@ function renderDevices() {
 
   if (cnt) cnt.textContent = devs.length + ' device' + (devs.length !== 1 ? 's' : '');
 
-  // Map view is handled separately; renderDevices handles grid/list only
-  if (state.view === 'map') { showMapView(); return; }
+  // Map view is handled separately
+  if (state.view === 'map') { 
+    document.getElementById('pagination-controls').style.display = 'none';
+    showMapView(); 
+    return; 
+  }
   hideMapView();
 
   if (!devs.length) {
     grid.style.display = 'none';
     empty.style.display = 'flex';
+    document.getElementById('pagination-controls').style.display = 'none';
     return;
   }
 
@@ -936,16 +943,56 @@ function renderDevices() {
   grid.className = state.view === 'grid' ? 'device-grid' : 'device-list';
   grid.style.display = state.view === 'grid' ? 'grid' : 'flex';
 
-  // Build HTML using DeviceCard() component
-  grid.innerHTML = devs.map(DeviceCard).join('');
+  // --- Pagination Logic ---
+  const totalPages = Math.ceil(devs.length / state.pageSize);
+  if (state.page > totalPages && totalPages > 0) state.page = totalPages;
+  if (state.page < 1) state.page = 1;
+  const startIdx = (state.page - 1) * state.pageSize;
+  let pageDevs = devs.slice(startIdx, startIdx + state.pageSize);
 
-  // Attach card interactions
+  // --- View Rendering Logic ---
+  if (state.view === 'list') {
+    // Grouped list view: sort ALL filtered devices by location before paginating
+    devs.sort((a, b) => a.location.localeCompare(b.location) || a.name.localeCompare(b.name));
+    pageDevs = devs.slice(startIdx, startIdx + state.pageSize);
+    
+    let html = '';
+    let lastLocation = null;
+    pageDevs.forEach(d => {
+      if (d.location !== lastLocation) {
+        // Count total devices for this location (across all pages)
+        const locCount = devs.filter(x => x.location === d.location).length;
+        html += `
+          <div class="location-group-header">
+            <h3>📍 ${d.location}</h3>
+            <span class="location-group-count">${locCount} devices</span>
+          </div>
+        `;
+        lastLocation = d.location;
+      }
+      html += DeviceCard(d);
+    });
+    grid.innerHTML = html;
+  } else {
+    // Grid view
+    grid.innerHTML = pageDevs.map(DeviceCard).join('');
+  }
+
+  // --- Update Pagination UI ---
+  const pag = document.getElementById('pagination-controls');
+  if (totalPages > 1) {
+    pag.style.display = 'flex';
+    document.getElementById('page-info').textContent = `Page ${state.page} of ${totalPages}`;
+    document.getElementById('page-prev').disabled = state.page === 1;
+    document.getElementById('page-next').disabled = state.page === totalPages;
+  } else {
+    pag.style.display = 'none';
+  }
+
+  // Attach card animations (onclick is already in HTML)
   grid.querySelectorAll('.device-card').forEach((el, i) => {
     el.style.animationDelay = (i * 25) + 'ms';
     el.classList.add('card-enter');
-    const device = DEVICES_DATA.find(d => d.id === el.dataset.id);
-    el.addEventListener('click', () => openModal(device));
-    el.addEventListener('keydown', e => { if (e.key === 'Enter') openModal(device); });
   });
 }
 
@@ -1407,6 +1454,7 @@ function bindEvents() {
   // ── Location filter dropdown ──
   document.getElementById('filter-location')?.addEventListener('change', e => {
     state.locationFilter = e.target.value;
+    state.page = 1;
     renderDevices();
   });
 
@@ -1470,6 +1518,7 @@ function bindEvents() {
       document.querySelectorAll('[data-view]').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       state.view = btn.dataset.view;
+      state.page = 1;
       if (state.view === 'map') {
         showMapView();
       } else {
@@ -2588,3 +2637,12 @@ async function fetchAndRenderDeviceHistory(device) {
     loadingDiv.innerHTML = '<p>⚠️ Failed to load history</p>';
   }
 }
+
+
+  // ── Pagination Listeners ──
+  document.getElementById('page-prev')?.addEventListener('click', () => {
+    if (state.page > 1) { state.page--; renderDevices(); }
+  });
+  document.getElementById('page-next')?.addEventListener('click', () => {
+    state.page++; renderDevices();
+  });
