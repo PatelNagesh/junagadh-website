@@ -27,4 +27,4 @@ build/
 *.log
 
 # API credentials (never commit!)
-config.js
+# config.js (un-ignored to allow GitHub Pages to fetch live data)

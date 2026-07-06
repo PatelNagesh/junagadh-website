@@ -1968,11 +1968,20 @@ function initMap() {
  *              location that has devices AND has known coordinates.
  * @used-in  showMapView(), refreshData() when map view is active
  */
+let markerClusterGroup = null;
+
 function renderMap() {
   if (!leafletMap) return;
 
-  // Clear old markers
-  mapMarkers.forEach(m => m.remove());
+  // Clear old markers & clusters
+  if (markerClusterGroup) {
+    leafletMap.removeLayer(markerClusterGroup);
+    markerClusterGroup.clearLayers();
+  } else {
+    mapMarkers.forEach(m => m.remove());
+  }
+  
+  markerClusterGroup = L.markerClusterGroup({ maxClusterRadius: 50 });
   mapMarkers = [];
 
   // Group devices by location
