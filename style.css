@@ -2489,4 +2489,30 @@ select.filter-sel:focus {
   {
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), var(--surface));
   border-color: rgba(245, 158, 11, 0.2);
+}\n
+/* ═══════════════════════════════════════
+   PASSWORD TOGGLE
+════════════════════════════════════════ */
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.password-wrapper input {
+  width: 100%;
+  padding-right: 40px;
+}
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0;
+  opacity: 0.6;
+  transition: opacity var(--transition);
+}
+.password-toggle:hover {
+  opacity: 1;
 }

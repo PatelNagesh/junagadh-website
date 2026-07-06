@@ -1509,6 +1509,16 @@ function bindEvents() {
   // ── Print Report button ──
   document.getElementById('print-btn')?.addEventListener('click', printReport);
 
+  // ── Password Visibility Toggle ──
+  document.getElementById('toggle-password')?.addEventListener('click', (e) => {
+    const passInput = document.getElementById('setup-pass');
+    if (passInput) {
+      const isPass = passInput.getAttribute('type') === 'password';
+      passInput.setAttribute('type', isPass ? 'text' : 'password');
+      e.target.textContent = isPass ? '🙈' : '👁️';
+    }
+  });
+
   // ── Credentials Setup form ──
   document.getElementById('setup-form')?.addEventListener('submit', handleSetupSubmit);
 
