@@ -1375,6 +1375,11 @@ async function refreshData() {
 
   } catch (err) {
     console.error('[JUMC IoT] Refresh failed:', err.message);
+    if (err.message.includes('HTTP 401') || err.message.includes('check credentials') || err.message.includes('Invalid username or password')) {
+      ToastNotification('❌ Invalid credentials – please log in again', 'error', 6000);
+      clearCredentials();
+      return;
+    }
     const isCORS = err.message.includes('Failed to fetch') || err.message.includes('NetworkError');
     if (isCORS) {
       ToastNotification('⚠️ Network/CORS error – showing cached data. Open via a web server for live data.', 'error', 6000);
@@ -1434,6 +1439,9 @@ function bindEvents() {
 
   // ── Manual refresh button ──
   document.getElementById('refresh-btn')?.addEventListener('click', () => refreshData());
+
+  // ── Logout button ──
+  document.getElementById('logout-btn')?.addEventListener('click', clearCredentials);
 
   // ── Status filter buttons (All / Running / Standby / Online / Offline / Not Configured) ──
   document.querySelectorAll('[data-filter]').forEach(btn => {
@@ -1578,6 +1586,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 9. Check if credentials exist
   if (CONFIG.username) {
+    document.getElementById('logout-btn')?.style.setProperty('display', 'flex');
     // Credentials available – start real-time WebSocket (falls back to polling)
     startWebSocket();
   } else {
@@ -2534,6 +2543,11 @@ async function connectWebSocket() {
 
   } catch (err) {
     console.error('[JUMC WS] Connect failed:', err.message);
+    if (err.message.includes('HTTP 401')) {
+      ToastNotification('❌ Invalid credentials – please log in again', 'error', 6000);
+      clearCredentials();
+      return;
+    }
     scheduleWsReconnect();
   }
 }
