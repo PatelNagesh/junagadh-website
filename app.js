@@ -1296,7 +1296,11 @@ function updateCountdown() {
 function setFetchingState(loading) {
   state.isFetching = loading;
   const btn = document.getElementById('refresh-btn');
-  if (btn) btn.classList.toggle('spinning', loading);
+  if (btn) {
+    btn.classList.toggle('spinning', loading);
+    btn.disabled = loading;
+    btn.style.pointerEvents = loading ? 'none' : 'auto';
+  }
   const cd = document.getElementById('sync-countdown');
   if (cd) cd.textContent = loading ? 'Syncing...' : '';
 }
@@ -1311,15 +1315,6 @@ function setFetchingState(loading) {
 async function refreshData() {
   const btn = document.getElementById('refresh-btn');
   if (btn) btn.classList.add('loading');
-
-  // If WebSocket is alive, we already have fresh data! Just redraw UI.
-  if (typeof WS !== 'undefined' && WS.isLive) {
-    renderStats();
-    if (state.view === 'map') renderMap(); else renderDevices();
-    renderLastUpdated();
-    if (btn) btn.classList.remove('loading');
-    return;
-  }
 
   if (state.isFetching) return;  // prevent overlapping calls
   if (!CONFIG.username || !CONFIG.password) {
