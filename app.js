@@ -1584,6 +1584,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('logout-btn')?.style.setProperty('display', 'flex');
     // Credentials available – start real-time WebSocket (falls back to polling)
     startWebSocket();
+    startAutoRefresh(); // Trigger initial REST fetch and polling
   } else {
     // No credentials – show setup modal for first-run / GitHub Pages
     showSetupModal();
